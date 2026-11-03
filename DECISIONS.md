@@ -92,3 +92,8 @@
 - **Options:** Store the text status, store SQLite integer 1/0, or add a separate payment table.
 - **Choice:** Store paid as SQLite `INTEGER` with `CHECK (paid IN (0, 1))`, where `1` means yes and `0` means no.
 - **Why:** Integer booleans are idiomatic in SQLite, support efficient filtering, and the check constraint prevents values outside the two valid states.
+
+## 18. Treat display items as available in the query pack
+- **Problem:** Q11 must report inventory availability for every item, including Vintage Leica (Showcase).
+- **Choice:** Display items always contribute their full `total_units` in Q11, regardless of the open-rental count.
+- **Why:** The seeded display item has no rentals and the spec expects 1 available. This matches the rental policy that display items cannot be rented while also preserving useful availability output.

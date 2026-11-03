@@ -274,3 +274,9 @@ Use SQLite, and keep that choice for all of Phase 3.
    dates, negative units, and restricted customer deletion.
 5. Add 2 entries to DECISIONS.md and this prompt to AI_LOG.md.
 Run pytest and fix failures.
+
+Read SPEC.md Phase 3 task 3.5 and sql/schema.sql, sql/seed.sql.
+Do not break earlier tests or run git commands. Create sql/queries.sql
+with the 12 queries and exact expected values, add DECISIONS.md for the
+Vintage Leica availability choice, create tests/test_queries.py, append
+this prompt to AI_LOG.md, and run pytest.
