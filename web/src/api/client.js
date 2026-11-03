@@ -25,3 +25,28 @@ export async function getGear({ q, category, sort }, signal) {
 
   return response.json()
 }
+
+export async function addGear(item, signal) {
+  const response = await fetch(`${API_URL}/gear`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(item),
+    signal,
+  })
+
+  if (!response.ok) {
+    let body
+    try {
+      body = await response.json()
+    } catch {
+      body = { message: 'The rental server returned an invalid response.' }
+    }
+
+    const error = new Error(body.message || body.detail || 'The rental server request failed.')
+    error.error = body.error
+    error.body = body
+    throw error
+  }
+
+  return response.json()
+}

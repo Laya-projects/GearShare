@@ -101,6 +101,11 @@ Problem: A previous slow response could arrive after newer search results.
 Choice: Create and abort an AbortController for each search effect, and ignore AbortError without showing an error.
 Why: Abort cleanup is scoped to the request lifecycle and reliably cancels superseded work; a manual latest-request counter would duplicate this protection and is unnecessary when the API and browser honor AbortController.
 
+24. Keep item validation in one testable function
+Problem: The staff form must keep its submit action disabled and show field-specific errors without validation rules drifting.
+Choice: Compute all item field errors through validateItem(form) and derive submit validity from that result.
+Why: One pure validation function gives the UI and tests one source of truth and keeps server submission logic separate from input validation.
+
 21. Map domain exceptions to HTTP statuses
 Problem: Rule failures need stable HTTP semantics without duplicating rules or messages in the API.
 Choice: Use 404 for missing customers and items, 422 for invalid SKU input, and 409 for item/rental rule conflicts.

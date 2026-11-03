@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { getGear } from '../api/client'
 import GearList from '../components/GearList'
+import LoadingMessage from '../components/LoadingMessage'
+import ErrorMessage from '../components/ErrorMessage'
+import EmptyMessage from '../components/EmptyMessage'
 import useDebouncedValue from '../hooks/useDebouncedValue'
 
 const categories = [
@@ -22,7 +25,7 @@ export default function CataloguePage() {
   const sort = searchParams.get('sort') || 'name'
   const debouncedQ = useDebouncedValue(q, 300)
   const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [status, setStatus] = useState('loading')
   const [error, setError] = useState(null)
   const [retryVersion, setRetryVersion] = useState(0)
 
@@ -42,19 +45,19 @@ export default function CataloguePage() {
 
   useEffect(() => {
     const controller = new AbortController()
-    setLoading(true)
+    setStatus('loading')
     setError(null)
 
     getGear({ q: debouncedQ, category, sort }, controller.signal)
       .then((gear) => {
         setItems(gear)
-        setLoading(false)
+        setStatus(gear.length === 0 ? 'empty' : 'success')
       })
       .catch((requestError) => {
         if (requestError.name === 'AbortError') return
 
         setError(requestError)
-        setLoading(false)
+        setStatus('error')
       })
 
     // Aborting the previous request in cleanup prevents its slow response from
@@ -72,8 +75,6 @@ export default function CataloguePage() {
   }
 
   const resultCount = items.length
-  const isEmptyText = debouncedQ === 'zzz'
-
   return (
     <div>
       <h1 className="mb-6 text-3xl font-bold text-slate-900">Catalogue</h1>
@@ -113,33 +114,24 @@ export default function CataloguePage() {
         </label>
       </div>
 
-      {loading && <p>Loading catalogue...</p>}
-      {!loading && error && (
-        <div>
-          <p>Can't reach the rental server.</p>
-          <button
-            type="button"
-            onClick={() => setRetryVersion((version) => version + 1)}
-            className="mt-2 rounded-md border border-slate-300 px-3 py-2"
-          >
-            Retry
-          </button>
-        </div>
+      {status === 'loading' && <LoadingMessage />}
+      {status === 'error' && (
+        <ErrorMessage
+          message={
+            error?.error || error?.body
+              ? error.message
+              : "Can't reach the rental server."
+          }
+          onRetry={() => setRetryVersion((version) => version + 1)}
+        />
       )}
-      {!loading && !error && (
+      {status === 'empty' && <EmptyMessage query={debouncedQ} />}
+      {status === 'success' && (
         <>
           <p className="mb-4 text-sm text-slate-600">
             {resultCount} {resultCount === 1 ? 'result' : 'results'}
           </p>
-          {items.length === 0 ? (
-            <p>
-              {isEmptyText
-                ? "No items match 'zzz'. Try a different word."
-                : `No items match '${debouncedQ}'. Try a different word.`}
-            </p>
-          ) : (
-            <GearList items={items} onAction={() => {}} />
-          )}
+          <GearList items={items} onAction={() => {}} />
         </>
       )}
     </div>

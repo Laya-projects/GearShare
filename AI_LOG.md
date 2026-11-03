@@ -17,6 +17,12 @@
    temporary-database API tests, API README, status/TODAY decisions, and run
    pytest. Do not run Git commands.
 
+   Read SPEC.md Phase 4 task 4.4 and the behaviour table. Add the reusable
+   loading/error/empty states, explicit catalogue status rendering, the staff
+   AddItemPage with pure validation and POST support, accessible labels and
+   error associations, add one UI decision, and do not run Git commands or
+   change api/ or Python files.
+
    Read SPEC.md Phase 4 task 4.3 and the behaviour table. Add the fetch client,
    debounced search, URL-backed catalogue controls, AbortController cleanup,
    loading/error/empty states, routing, two state-management decisions, and do
