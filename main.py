@@ -1,0 +1,1 @@
+"""GearShare console entry point."""
