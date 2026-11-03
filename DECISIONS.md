@@ -85,3 +85,8 @@ Why: Tailwind provides utility-first styling directly in JSX, responsive variant
 Problem: Searching, opening an item, and returning to the catalogue must preserve the customer's previous search.
 Choice: Store the search text, category, and sort in URL query parameters.
 Why: URL state survives route navigation and browser history, so `Back to results` can restore the catalogue without duplicating state in navigation-specific components.
+
+18. Keep component data flow props-only in Phase 4.2
+Problem: The initial catalogue components need predictable rendering before routing, API calls, and shared state exist.
+Choice: Pass items and event handlers down explicitly through props, with no component fetching or global context.
+Why: Props-only presentational components isolate UI from data source changes, make Phase 4.2 testable with hard-coded data, and avoid adding router or state architecture before later tasks require it.
