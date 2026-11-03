@@ -291,3 +291,10 @@ Read SPEC.md Phase 3 task 3.7, the existing GearShare code, and Phase 3
 SQL files. Use SQLite repositories beneath GearShare, preserve Phase 1 and
 2 behavior, add persistence and rollback coverage, append two DECISIONS.md
 entries, record this prompt, and run pytest.
+
+Read SPEC.md Phase 3 task 3.8 and sql/schema.sql. Create the isolated
+injection demo in experiments/injection_demo.py and experiments/__init__.py,
+save output in docs/injection_evidence.md, add the TODO explanation
+placeholders, add four-result and SQL-formatting tests, add one DECISIONS.md
+entry, append this prompt to AI_LOG.md, and run pytest. Do not touch
+gearshare.db, storage/, or gearshare.py.

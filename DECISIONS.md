@@ -117,3 +117,8 @@
 - **Problem:** Domain operations need durable persistence without SQL leaking into business logic.
 - **Choice:** Repositories own DB API access and object loading, while GearShare validates rules and coordinates transactions.
 - **Why:** Parameterized repository methods keep database details replaceable, and GearShare remains the one place for check order and exception messages.
+
+## 23. Isolate SQL injection as a throwaway experiment
+- **Problem:** The SQL injection experiment must demonstrate the failure mode without weakening production SQL rules.
+- **Choice:** Keep the deliberately unsafe f-string query only in `experiments/injection_demo.py`, against an in-memory seeded database.
+- **Why:** This makes the vulnerability visible in an isolated sample while repository code and the application database remain parameterized and unchanged.
