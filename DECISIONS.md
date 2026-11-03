@@ -32,3 +32,17 @@
 - **Options:** Store values in conditional fields, use a membership lookup table, or implement methods on polymorphic customer subclasses.
 - **Choice:** Implement all three policy methods on `BasicCustomer`, `PlusCustomer`, and `ProCustomer`.
 - **Why:** Concrete subclasses provide independent values through one interface, avoid tier-based branching in callers, and make each policy naturally extensible.
+
+## Decision 6: Data collection types for the service
+
+- **Problem:** The service repeatedly looks up items and customers, scans rental history, checks SKU uniqueness, and returns overdue records.
+- **Options:** Keep one nested list for all records, use separate maps and collections, or store everything in SQL.
+- **Choice:** Use a dict keyed by SKU, a dict keyed by customer ID, a list of rentals, and a set of SKUs.
+- **Why:** The dictionaries provide direct identity lookup, the list preserves rental chronology for history and availability calculations, and the set gives constant-time SKU membership checks without duplicating item data.
+
+## Decision 7: Availability reconstruction
+
+- **Problem:** In-memory availability must match the starter rentals after loading and remain consistent after returns.
+- **Options:** Persist a separate availability counter, mark units in an inventory structure, or calculate availability from open rentals.
+- **Choice:** Calculate each item's available units as its total units minus rentals with no return date.
+- **Why:** Availability derived from open rentals is a single source of truth, rebuilds correctly from CSV data, and cannot drift when a return state is loaded or updated.

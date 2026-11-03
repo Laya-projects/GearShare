@@ -54,3 +54,42 @@ The service class and menu come later.
    Use parametrize for the tier table.
 Add 2 entries to DECISIONS.md and this prompt to AI_LOG.md.
 Run pytest, fix failures, then commit as "1.2 Core classes and validation".
+
+Read SPEC.md Phase 1 task 1.3, the Rental Rulebook, the order of checks,
+and the existing classes. Build the service class only. No menu yet.
+
+Create gearshare.py with class GearShare and these methods:
+load_data(), list_items(), rent(), return_item(), extend(),
+join_waiting_list(), customer_rentals(), overdue_report().
+
+Rules:
+1. Pass `today` into every date-dependent method. Never call
+   date.today() inside the class.
+2. rent() checks in this exact order, and reports only the first failure:
+   customer exists -> SKU is 10 digits -> item exists -> R1 -> R4 (fines
+   above 500) -> R3 -> R8 -> availability (raise ItemNotAvailableError so
+   the caller can offer the waiting list, R7).
+3. Late fee (R5, R10): days late x tier daily rate, capped at the item's
+   price. Returning on the due date is not late.
+4. extend(): max 2 extensions (R6), each adds the tier's rental period to
+   the current due date. Accessories cannot be extended (R2). No extension
+   if someone is waiting.
+5. Waiting list: a collections.deque per SKU, first come first served (R7).
+   return_item() reports who is next.
+6. Collections: dict by SKU, dict by customer ID, list of rentals, set of
+   SKUs. Explain why in DECISIONS.md.
+7. Rebuild availability from rentals that have no return date.
+8. Messages must match the SPEC.md samples character for character:
+   "ERROR [R3]: ..." for rule errors, "ERROR [ClassName]: ..." for others.
+   Put messages in the exception classes, not scattered in the service.
+9. Make sure there is no `if tier ==` anywhere.
+
+Tests (fresh state per test, never rely on an earlier test):
+- Every rule R1 to R10 at least once.
+- The two worked-example tables (due dates and late fees) with
+  @pytest.mark.parametrize.
+- pytest.raises for every exception.
+- Session A from the spec, step by step: the Vikram fee is exactly 500,
+  Rohan is blocked with 600, RN003 extensions 1 and 2, then the error.
+Add 2 entries to DECISIONS.md and this prompt to AI_LOG.md.
+Run pytest, fix failures, then commit as "1.3 GearShare service and exceptions".
