@@ -280,3 +280,9 @@ Do not break earlier tests or run git commands. Create sql/queries.sql
 with the 12 queries and exact expected values, add DECISIONS.md for the
 Vintage Leica availability choice, create tests/test_queries.py, append
 this prompt to AI_LOG.md, and run pytest.
+
+Read SPEC.md Phase 3 task 3.6 and sql/schema.sql, sql/seed.sql.
+Do not run git commands or break existing tests. Create sql/tx_demo.sql,
+sql/run_tx_demo.py, transaction tests, sql/generate_big.py,
+sql/index_report.py, sql/indexes.sql, and docs/index_report.md. Add two
+DECISIONS.md entries, append this prompt to AI_LOG.md, and run pytest.

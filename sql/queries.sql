@@ -134,8 +134,14 @@ ORDER BY i.sku;
 SELECT a.name AS item_a,
        b.name AS item_b,
        COUNT(DISTINCT r1.customer_id) AS customers
-FROM rentals AS r1
-JOIN rentals AS r2
+FROM (
+    SELECT DISTINCT customer_id, sku
+    FROM rentals
+) AS r1
+JOIN (
+    SELECT DISTINCT customer_id, sku
+    FROM rentals
+) AS r2
   ON r2.customer_id = r1.customer_id
  AND r1.sku < r2.sku
 JOIN items AS a ON a.sku = r1.sku

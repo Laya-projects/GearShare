@@ -97,3 +97,13 @@
 - **Problem:** Q11 must report inventory availability for every item, including Vintage Leica (Showcase).
 - **Choice:** Display items always contribute their full `total_units` in Q11, regardless of the open-rental count.
 - **Why:** The seeded display item has no rentals and the spec expects 1 available. This matches the rental policy that display items cannot be rented while also preserving useful availability output.
+
+## 19. Commit transaction demo changes atomically
+- **Problem:** A rental and its audit row must either both persist or both remain absent.
+- **Choice:** Use a transaction, an INSERT with a deliberate audit constraint failure for the rollback case, and a valid audit insert for the commit case.
+- **Why:** The rental foreign keys point to durable history, so preserving matching rental and audit records prevents partial service writes.
+
+## 20. Benchmark indexes with temporary data
+- **Problem:** Query-plan measurements should not alter GearShare's persistent database.
+- **Choice:** Generate fixed-seed benchmark rentals in a temporary SQLite database and add indexes only to that database.
+- **Why:** The benchmark is reproducible, isolated from seed data, and can safely support EXPLAIN and timing comparisons.
