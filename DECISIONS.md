@@ -109,3 +109,17 @@
 - **Options:** Run one service permanently, reset state after every sample, or construct fresh state before timed measurements.
 - **Choice:** Construct and reset state outside each timed operation where operation state permits, with one fresh service per measured call.
 - **Why:** Setup isolation prevents one sample from changing availability, audit history, or rental state for the next sample.
+
+## Decision 17: Binary search comparison contract
+
+- **Problem:** Binary search must support both the search result and the comparison count needed by the sample output.
+- **Options:** Return only an index and calculate comparisons separately, return a result object, or return the index and count together.
+- **Choice:** Return `(index, comparisons)` from `binary_search`.
+- **Why:** A tuple keeps the API small while making the exact number of midpoint checks observable and testable.
+
+## Decision 18: Catalogue sorting order
+
+- **Problem:** The catalogue needs deterministic mixed-direction ordering across top-level categories.
+- **Options:** Several separate passes, category-specific branches, or one tuple key.
+- **Choice:** Sort once with a tuple key containing top-level category, negated weight, and name.
+- **Why:** Negating weight provides descending weight within an ascending category, while `sorted` supplies stable deterministic ordering for names.

@@ -158,3 +158,12 @@ log this prompt in AI_LOG.md, and commit as
 Read SPEC.md Phase 2 task 2.1 and the existing Phase 1 code.
 Create dsa/__init__.py and benchmarks/generate_items.py, benchmark script,
 report, tests, decisions, and log this prompt.
+
+Read SPEC.md Phase 2 task 2.2 and the existing code.
+Create dsa/search.py and dsa/sorting.py:
+linear_search_by_name(items, name), binary_search(skus, target) with comparison counts,
+bubble_sort, insertion_sort, and selection_sort with exact pass output, and catalogue_sort.
+Create benchmarks/sort_compare.py and docs/sort_report.md using median timings of five runs
+for 1k, 5k, and 10k names with hand-sort printing suppressed during timing.
+Add search, sorting, edge-case, catalogue-order, and starter-data tests; add two DECISIONS.md
+entries and log this prompt. Run pytest without committing.
