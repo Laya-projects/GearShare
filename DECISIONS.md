@@ -74,3 +74,15 @@
 - **Options:** Use SQLite or PostgreSQL.
 - **Choice:** Use SQLite.
 - **Why:** It is built into Python, requires no server setup, is enough for this small dataset, and makes fresh temporary databases practical for tests. PostgreSQL would be preferable for higher concurrency, larger deployments, network access, and stronger multi-user administration.
+
+## 15. Preserve rental history on foreign-key deletion
+- **Problem:** Customer, item, rental, and audit records represent durable business history.
+- **Options:** Restrict deletion, set references to null, or cascade the dependent rows.
+- **Choice:** Use `RESTRICT` for `rentals.customer_id`, `rentals.sku`, fine and audit-log references.
+- **Why:** Cascading would silently erase rentals, fines, or audit evidence; restricting is the safer default and requires an explicit retention or archival process before deletion.
+
+## 16. Cascade only non-historical link data
+- **Problem:** Junction rows and waiting requests should not remain after their source entities disappear.
+- **Options:** Restrict every dependent row, use cascades everywhere, or distinguish transient links from history.
+- **Choice:** Use `CASCADE` for `item_tags`, waiting-list entries, and `SET NULL` for optional category parent references; restrict all historical relationships.
+- **Why:** Removing an item or tag should clean up its many-to-many links, and removing a customer should clean up their current waiting requests, while rentals and audit records remain protected by restrictions.

@@ -247,3 +247,18 @@ This task is documentation only, no schema code yet.
    PostgreSQL, and why.
 8. Add this prompt to AI_LOG.md.
 Keep each section short and clear.
+
+Read SPEC.md Phase 3 task 3.3 and docs/normalisation.md (final tables
+section). Do not break any earlier test. Do not run any git commands.
+Use SQLite, and keep that choice for all of Phase 3.
+
+1. Create sql/schema.sql for the Phase 3 tables with primary keys, foreign
+   keys, required values, uniqueness, checks, and PRAGMA foreign_keys = ON.
+2. Choose ON DELETE behavior deliberately for every foreign key and explain
+   it with SQL comments; protect rental history with RESTRICT.
+3. Create docs/er_diagram.mmd and docs/er_notes.md with all relationships
+   and cardinality.
+4. Add SQLite schema tests for table existence, duplicate SKU, invalid
+   dates, negative units, and restricted customer deletion.
+5. Add 2 entries to DECISIONS.md and this prompt to AI_LOG.md.
+Run pytest and fix failures.
