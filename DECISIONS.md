@@ -46,3 +46,17 @@
 - **Options:** Persist a separate availability counter, mark units in an inventory structure, or calculate availability from open rentals.
 - **Choice:** Calculate each item's available units as its total units minus rentals with no return date.
 - **Why:** Availability derived from open rentals is a single source of truth, rebuilds correctly from CSV data, and cannot drift when a return state is loaded or updated.
+
+## Decision 8: Audit timing source
+
+- **Problem:** Audit entries need a reliable operation date without making domain methods consult the system clock.
+- **Options:** Call the real clock inside each method, read the environment in the decorator, or pass the operation date through the existing method parameters.
+- **Choice:** Read `today` from the decorated method arguments and store its ISO value in the audit record.
+- **Why:** This keeps auditing deterministic, obeys the project rule that date-dependent methods receive their date, and prevents failed operations from being logged.
+
+## Decision 9: Report construction
+
+- **Problem:** Reports need to be lazy where appropriate while remaining useful for existing service callers.
+- **Options:** Build every report eagerly, expose only strings, or combine a lazy overdue generator with eagerly consumed report methods.
+- **Choice:** Add `iter_overdue` for lazy row generation and have `overdue_report` consume and sort it; add named methods for text, category, and fine reports.
+- **Why:** The generator avoids materializing the full overdue set while the report methods provide stable formatting and collections for callers and tests.

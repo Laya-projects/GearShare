@@ -5,6 +5,7 @@ from collections import deque
 from datetime import datetime
 from pathlib import Path
 
+from audit import audit
 from customers import BasicCustomer, PlusCustomer, ProCustomer
 from errors import (
     CustomerNotFoundError,
@@ -31,6 +32,8 @@ class GearShare:
         self.skus = set()
         self.waiting_lists = {}
         self.unpaid_fines = {}
+        self.audit = []
+        self.audit_log = self.audit
         self.data_dir = Path(data_dir) if data_dir else Path(__file__).resolve().parent / "data"
 
     @staticmethod
@@ -124,6 +127,7 @@ class GearShare:
         rented = sum(rental.return_date is None for rental in self.rentals if rental.sku == sku)
         return self.items[sku].total_units - rented
 
+    @audit
     def rent(self, customer_id, sku, today):
         customer = self.customers.get(customer_id)
         if customer is None:
@@ -162,6 +166,7 @@ class GearShare:
         days_late = max(0, (returned - due).days)
         return min(days_late * customer.late_fee_per_day(), item.price)
 
+    @audit
     def return_item(self, rental_id, today):
         rental = next((r for r in self.rentals if r.rental_id == rental_id), None)
         if rental is None:
@@ -189,6 +194,7 @@ class GearShare:
             "next_in_waiting_list": next_customer,
         }
 
+    @audit
     def extend(self, rental_id, today=None):
         rental = next((r for r in self.rentals if r.rental_id == rental_id), None)
         if rental is None:
@@ -228,17 +234,62 @@ class GearShare:
         return [rental for rental in self.rentals if rental.customer_id == customer_id]
 
     def overdue_report(self, today):
+        rows = sorted(list(self.iter_overdue(today)), key=lambda row: row["days_late"], reverse=True)
+        return rows
+
+    def iter_overdue(self, today):
         today = self._date(today)
-        result = []
         for rental in self.rentals:
             if rental.return_date is not None:
                 continue
             due = self._date(rental.due_date)
             days_late = max(0, (today - due).days)
             if days_late > 0:
-                result.append({
+                yield {
                     "rental": rental,
                     "days_late": days_late,
                     "fine": self.late_fee(rental, today),
-                })
-        return sorted(result, key=lambda row: row["days_late"], reverse=True)
+                }
+
+    def overdue_report_text(self, today):
+        rows = self.overdue_report(today)
+        lines = ["Overdue rentals as of " + self._iso(today)]
+        lines.append("RENTAL  CUSTOMER     ITEM             DUE         DAYS  FINE SO FAR")
+        lines.extend(
+            [
+                "{rental_id}   {customer:<11}  {item}   {due}  {days}     {fine}".format(
+                    rental_id=row["rental"].rental_id,
+                    customer=self.customers[row["rental"].customer_id].name,
+                    item=self.items[row["rental"].sku].name,
+                    due=self._iso(row["rental"].due_date),
+                    days=row["days_late"],
+                    fine=f"₹{row['fine']}",
+                )
+                for row in rows
+            ]
+        )
+        total_fines = sum(row["fine"] for row in rows)
+        lines.append(f"Total overdue: {len(rows)}   Fines so far: ₹{total_fines}")
+        return "\n".join(lines)
+
+    def format_overdue_report(self, today):
+        return self.overdue_report_text(today)
+
+    def items_by_category(self):
+        categories = {}
+        for item in self.items.values():
+            category = item.parent_category or item.category
+            categories.setdefault(category, []).append(item)
+        return {
+            category: sorted([item.name for item in categories[category]])
+            for category in sorted(categories, key=lambda name: name)
+        }
+
+    def customers_with_unpaid_fines(self):
+        return {
+            customer_id: amount
+            for customer_id, amount in sorted(
+                self.unpaid_fines.items(), key=lambda pair: pair[0]
+            )
+            if amount > 0
+        }

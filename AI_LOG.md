@@ -93,3 +93,25 @@ Tests (fresh state per test, never rely on an earlier test):
   Rohan is blocked with 600, RN003 extensions 1 and 2, then the error.
 Add 2 entries to DECISIONS.md and this prompt to AI_LOG.md.
 Run pytest, fix failures, then commit as "1.3 GearShare service and exceptions".
+
+Read SPEC.md Phase 1 task 1.4 and the existing gearshare.py.
+Add the Pythonic layer. Do not break any existing test.
+
+1. Decorator @audit (put it in audit.py): each time rent, return_item or
+   extend succeeds, append a record (time, action, customer, item) to an
+   audit list on GearShare. Failed calls must NOT be logged. Use
+   functools.wraps. Time must come from the `today` parameter, not
+   date.today(). Time values must use ISO YYYY-MM-DD format.
+2. Generator iter_overdue(today): yields overdue rentals one at a time
+   (due date before today and no return date). overdue_report() must
+   consume this generator.
+3. Three reports, using comprehensions and sorted(key=lambda ...):
+   a. Overdue report, most days late first. Format must match the
+      SPEC.md Option 8 sample exactly.
+   b. Items by category.
+   c. Customers with unpaid fines.
+4. Use map() or filter() at least once where it reads better than a loop.
+5. "Fine so far" is calculated, not saved.
+
+Add 2 entries to DECISIONS.md and this prompt to AI_LOG.md.
+Run pytest, fix failures, then commit as "1.4 Audit decorator, overdue generator and reports".
