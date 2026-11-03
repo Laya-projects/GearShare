@@ -50,3 +50,24 @@ export async function addGear(item, signal) {
 
   return response.json()
 }
+
+export async function getGearItem(sku, signal) {
+  const response = await fetch(`${API_URL}/gear/${encodeURIComponent(sku)}`, { signal })
+
+  if (!response.ok) {
+    let body
+    try {
+      body = await response.json()
+    } catch {
+      body = { message: 'The rental server returned an invalid response.' }
+    }
+
+    const error = new Error(body.message || 'The rental server request failed.')
+    error.error = body.error
+    error.status = response.status
+    error.body = body
+    throw error
+  }
+
+  return response.json()
+}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useLocation, useSearchParams } from 'react-router-dom'
 import { getGear } from '../api/client'
 import GearList from '../components/GearList'
 import LoadingMessage from '../components/LoadingMessage'
@@ -19,6 +19,7 @@ const categories = [
 ]
 
 export default function CataloguePage() {
+  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const [q, setQ] = useState(searchParams.get('q') || '')
   const category = searchParams.get('category') || 'All'
@@ -131,7 +132,7 @@ export default function CataloguePage() {
           <p className="mb-4 text-sm text-slate-600">
             {resultCount} {resultCount === 1 ? 'result' : 'results'}
           </p>
-          <GearList items={items} onAction={() => {}} />
+          <GearList items={items} onAction={() => {}} catalogueSearch={location.search} />
         </>
       )}
     </div>

@@ -326,3 +326,8 @@ app in web/, add Tailwind and the API environment files, create the five
 wireframes and component tree documents, render the minimal GearShare Mini
 App, add the Tailwind/search decisions, and do not run Git commands or change
 api/ or Python files.
+
+Read SPEC.md Phase 4 task 4.5 and the behaviour table. Add the catalogue,
+item details, rentals, basket, add-item, and not-found routes; use active
+NavLinks without reloads; add item detail fetching and back-query restoration;
+and do not run Git commands or change api/ or Python files.

@@ -106,6 +106,11 @@ Problem: The staff form must keep its submit action disabled and show field-spec
 Choice: Compute all item field errors through validateItem(form) and derive submit validity from that result.
 Why: One pure validation function gives the UI and tests one source of truth and keeps server submission logic separate from input validation.
 
+25. Restore catalogue filters through router state
+Problem: Item details navigation must return to a catalogue preserving its search text, category, and sort.
+Choice: Pass the catalogue location search string in GearCard Link state and use it for the Back to results URL, with the plain catalogue route as a fallback.
+Why: Router state keeps the previous catalogue query together with navigation without duplicating it in application-wide state.
+
 21. Map domain exceptions to HTTP statuses
 Problem: Rule failures need stable HTTP semantics without duplicating rules or messages in the API.
 Choice: Use 404 for missing customers and items, 422 for invalid SKU input, and 409 for item/rental rule conflicts.
