@@ -137,3 +137,17 @@
 - **Options:** Rescan the catalogue for every query or build purpose-specific hash structures.
 - **Choice:** Use dictionaries and Counters for grouping and frequency data, a weight dictionary for two-sum, and a word-to-SKU index.
 - **Why:** Hash-based structures keep each operation simple and make repeated lookup independent of catalogue length in the common case.
+
+## Decision 21: Undo stack entries
+
+- **Problem:** Undo must restore both successful rental and return operations exactly.
+- **Options:** Store only rental objects, store action summaries, or store independent operation records with previous state.
+- **Choice:** Store each undo record with action, IDs, SKU, and operation-specific prior state rather than a live Rental object.
+- **Why:** The copied state allows rent undo to remove the correct rental and return undo to restore its return date, fine balance, and waiting-list notification.
+
+## Decision 22: Waiting queue collection
+
+- **Problem:** Customers must be served in strict arrival order when an item becomes available.
+- **Options:** Use a list, a linked queue, or `collections.deque`.
+- **Choice:** Continue using one `deque` per SKU for waiting customers.
+- **Why:** `deque.append` and `popleft` provide constant-time FIFO operations, while undo can restore a notified customer at the front with `appendleft`.

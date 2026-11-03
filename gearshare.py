@@ -34,6 +34,7 @@ class GearShare:
         self.unpaid_fines = {}
         self.audit = []
         self.audit_log = self.audit
+        self.undo_stack = []
         self.data_dir = Path(data_dir) if data_dir else Path(__file__).resolve().parent / "data"
 
     @staticmethod
@@ -163,6 +164,15 @@ class GearShare:
         due_date = issue_date.__class__.fromordinal(issue_date.toordinal() + item.rental_period(customer))
         rental = Rental(customer_id, sku, issue_date, due_date)
         self.rentals.append(rental)
+        self.undo_stack.append({
+            "action": "rent",
+            "rental_id": rental.rental_id,
+            "customer_id": customer_id,
+            "sku": sku,
+            "previous_state": {
+                "return_date": None,
+            },
+        })
         return {"rental_id": rental.rental_id, "due_date": self._iso(due_date)}
 
     def late_fee(self, rental, returned_on):
@@ -182,6 +192,8 @@ class GearShare:
         customer = self.customers[rental.customer_id]
         due = self._date(rental.due_date)
         returned = self._date(today)
+        previous_return_date = rental.return_date
+        previous_fine = self.unpaid_fines.get(rental.customer_id, 0)
         days_late = max(0, (returned - due).days)
         fee = self.late_fee(rental, returned)
         rental.return_date = returned
@@ -192,6 +204,20 @@ class GearShare:
         if waiting:
             next_customer_id = waiting.popleft()
             next_customer = self.customers[next_customer_id].name
+        else:
+            next_customer_id = None
+        self.undo_stack.append({
+            "action": "return",
+            "rental_id": rental_id,
+            "customer_id": rental.customer_id,
+            "sku": rental.sku,
+            "previous_state": {
+                "return_date": previous_return_date,
+                "fine": previous_fine,
+                "fine_created": fee,
+                "notified": next_customer_id,
+            },
+        })
         return {
             "rental_id": rental_id,
             "customer": customer.name,
@@ -200,6 +226,47 @@ class GearShare:
             "fee": fee,
             "next_in_waiting_list": next_customer,
         }
+
+    def undo(self):
+        if not self.undo_stack:
+            return None
+        entry = self.undo_stack.pop()
+        if entry["action"] == "rent":
+            rental = next(
+                (row for row in self.rentals if row.rental_id == entry["rental_id"]),
+                None,
+            )
+            if rental is not None:
+                self.rentals.remove(rental)
+                number = rental.rental_id[2:]
+                if number.isdigit() and int(number) >= Rental._next_number - 1:
+                    Rental._next_number = int(number)
+            return entry
+
+        rental = next(
+            (row for row in self.rentals if row.rental_id == entry["rental_id"]),
+            None,
+        )
+        if rental is not None:
+            previous = entry["previous_state"]
+            rental.return_date = previous["return_date"]
+            self.unpaid_fines[entry["customer_id"]] = previous["fine"]
+            notified = previous["notified"]
+            if notified is not None:
+                waiting = self.waiting_lists.setdefault(entry["sku"], deque())
+                waiting.appendleft(notified)
+        return entry
+
+    def waiting_list(self, sku):
+        return list(self.waiting_lists.setdefault(sku, deque()))
+
+    def waiting_list_text(self, sku):
+        item = self.items[sku]
+        names = [
+            self.customers[customer_id].name
+            for customer_id in self.waiting_list(sku)
+        ]
+        return f"Waiting list for '{item.name}': {', '.join(names)}"
 
     @audit
     def extend(self, rental_id, today=None):

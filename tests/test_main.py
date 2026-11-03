@@ -24,7 +24,7 @@ def run_script(inputs):
 
 def test_bad_menu_input_does_not_crash():
     output = run_script(["abc", "", "0"])
-    assert output.count("Please enter a number from 0 to 8.") == 2
+    assert output.count("Please enter a number from 0 to 9.") == 2
 
 
 def test_catalogue_sample():

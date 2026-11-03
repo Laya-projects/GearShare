@@ -16,6 +16,7 @@ MENU = """=== GearShare Mini ===
 6. Join waiting list
 7. Customer rentals
 8. Overdue report
+9. Undo
 0. Exit"""
 
 
@@ -169,10 +170,26 @@ def run_menu(service, today, input_fn=input):
                 customer_rentals(service, input_fn("Customer ID: ").strip(), today)
             elif choice == "8":
                 print_overdue(service, today)
+            elif choice == "9":
+                entry = service.undo()
+                if entry is None:
+                    print("Nothing to undo.")
+                elif entry["action"] == "rent":
+                    print(
+                        f"OK: Undid rental of '{service.items[entry['sku']].name}' by "
+                        f"{service.customers[entry['customer_id']].name} "
+                        f"(rental {entry['rental_id']} removed)."
+                    )
+                else:
+                    print(
+                        f"OK: Undid return of '{service.items[entry['sku']].name}' for "
+                        f"{service.customers[entry['customer_id']].name} "
+                        f"(rental {entry['rental_id']} reopened)."
+                    )
             else:
-                print("Please enter a number from 0 to 8.")
+                print("Please enter a number from 0 to 9.")
         except ValueError:
-            print("Please enter a number from 0 to 8.")
+            print("Please enter a number from 0 to 9.")
         except GearShareError as error:
             print(error)
         finally:

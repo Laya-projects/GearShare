@@ -173,3 +173,11 @@ Create dsa/hashing.py and import_gear.py. Implement duplicate SKU detection,
 tag grouping, most-rented frequency ranking, one-pass packing two-sum, and
 word-to-SKU multi-word search. Add gear_with_duplicate.csv, hashing tests,
 and two DECISIONS.md entries. Run pytest without git commands.
+
+Read SPEC.md Phase 2 task 2.4 and the existing code.
+Add GearShare undo stack entries and undo support for rent and return, update
+the menu with option 9 and zero-to-nine input validation, and expose FIFO
+waiting-list display. Add the linked rental history structure, stretch delete,
+reverse and second-from-end operations, and list-versus-deque benchmark/report.
+Add undo, waiting-list, and history tests plus two DECISIONS.md entries.
+Run pytest without git commands.
