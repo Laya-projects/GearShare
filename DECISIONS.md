@@ -60,3 +60,17 @@
 - **Options:** Build every report eagerly, expose only strings, or combine a lazy overdue generator with eagerly consumed report methods.
 - **Choice:** Add `iter_overdue` for lazy row generation and have `overdue_report` consume and sort it; add named methods for text, category, and fine reports.
 - **Why:** The generator avoids materializing the full overdue set while the report methods provide stable formatting and collections for callers and tests.
+
+## Decision 10: Console interaction boundary
+
+- **Problem:** The menu must accept bad input, provide waiting-list interaction, and remain testable without changing domain rules.
+- **Options:** Scatter prompts and exceptions through the service, use a large monolithic script, or keep a small console adapter around the domain service.
+- **Choice:** Put prompting, transcript formatting, and menu dispatch in `main.py`, while leaving all business operations in `GearShare`.
+- **Why:** This makes the console replaceable, allows simulated-input tests, and prevents presentation code from duplicating rule logic.
+
+## Decision 11: Environment date handling
+
+- **Problem:** Console operation must be reproducible with `TODAY` while also remaining usable outside a configured shell.
+- **Options:** Read the environment inside the service, hard-code the training date, or read the environment once in `main.py` with a real-date fallback.
+- **Choice:** Resolve `today` in `main.py` and pass it into each date-dependent service call.
+- **Why:** Production behavior remains functional without configuration, samples remain deterministic, and no domain method is coupled to the system clock.

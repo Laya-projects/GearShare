@@ -115,3 +115,28 @@ Add the Pythonic layer. Do not break any existing test.
 
 Add 2 entries to DECISIONS.md and this prompt to AI_LOG.md.
 Run pytest, fix failures, then commit as "1.4 Audit decorator, overdue generator and reports".
+
+Read SPEC.md Phase 1 task 1.5 and the existing code. Build the menu,
+file loading and finish the Phase 1 deliverables. Do not break any
+existing test.
+
+1. main.py: read TODAY from the environment (fallback: the real date)
+   and pass it into every date-dependent call. Load the three CSVs
+   (gear, customers, rentals) plus fines.csv. Rebuild availability from
+   rentals with no return date.
+2. Start-up output must match SPEC.md exactly:
+   "Loaded 7 items, 5 customers, 10 rentals, 4 fines."
+   "Today is 2026-11-03." then the menu with options 0 to 8.
+3. Menu loop for options 1 to 8 and 0 (exit): list catalogue, search
+   (case-insensitive, name or tag, "No items match 'zzz'." when empty),
+   rent (offer the waiting list with "(y/n)" when no unit is free),
+   return, extend, join waiting list, customer rentals, overdue report.
+   Output format, column spacing and the ₹ symbol must match the samples.
+4. Bad input (letters, empty text, unknown IDs) must never crash the
+   program. Print "Please enter a number from 0 to 8." for bad menu
+   choices. Use try/except/finally. Catch GearShareError and print
+   "ERROR [R3]: ..." for rule errors and "ERROR [ClassName]: ..." for
+   others, using the messages defined in the exception classes.
+5. Tests...
+6. README deliverables and requirements.
+Add 2 entries to DECISIONS.md and this prompt to AI_LOG.md.
