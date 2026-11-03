@@ -49,3 +49,15 @@
 - **Problem:** Customers must be served in strict arrival order when an item becomes available.
 - **Choice:** Keep one `collections.deque` per SKU.
 - **Why:** `append` and `popleft` give constant-time FIFO, and undo can restore a notified customer to the front with `appendleft`.
+
+## 11. Build a rental-centric flat file for Phase 3.1
+- **Problem:** The four starter CSVs must be combined into one rental-level analytical file.
+- **Options:** Join at runtime, generate a flat CSV once, or duplicate all source keys in the Python code.
+- **Choice:** Generate `gearshare_flat.csv` with joins keyed by customer ID, SKU, and rental ID.
+- **Why:** Each rental remains one row, source values stay data-driven, and fine values are optional without invented rows.
+
+## 12. Preserve empty flat-file values
+- **Problem:** Open rentals and rentals without fines need an unambiguous representation.
+- **Options:** Use null sentinels, text such as None, or empty CSV cells.
+- **Choice:** Use empty cells for `return_date` and for fine fields when no fine exists.
+- **Why:** Empty cells are consistent with the starter CSV format and keep downstream CSV readers simple.

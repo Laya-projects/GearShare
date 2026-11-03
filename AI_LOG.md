@@ -189,3 +189,33 @@ real-data category Node tree, recursive print/count/path functions, and an
 iterative stack count. Add docs/recursion_notes.md placeholders plus recursion
 and category edge-case tests, and two DECISIONS.md entries. Run pytest without
 git commands.
+
+Read SPEC.md Phase 3 task 3.1 and the four starter CSVs in data/.
+Do not break any earlier test. Do not run any git commands.
+
+1. Create sql/build_flat.py that combines gear.csv, customers.csv,
+   rentals.csv and fines.csv into data/gearshare_flat.csv, with one row
+   per rental (10 rows) and exactly these columns in this order:
+   rental_id, customer_name, email, tier, item_name, tags (as one
+   ; separated cell), sku, category, parent_category, weight_g, price,
+   issue_date, due_date, return_date, fine, fine_paid
+   - parent_category is Photography for Cameras and Lenses, empty for
+     the rest.
+   - fine and fine_paid are empty when the rental has no fine.
+   - Use the csv module, no hard-coded rows.
+2. Create docs/normalisation.md with the heading "3.1 Anomalies" and
+   three sections: Update anomaly, Insert anomaly, Delete anomaly. For
+   each, use REAL rows from the flat file:
+   - Update: Rohan's email changes, so how many rows must change?
+   - Insert: where does Pooja Menon go when she has never rented, and
+     where does the Vintage Leica go?
+   - Delete: what happens to the only record of the SD card if RN005
+     is deleted?
+   Keep each section to 3 or 4 sentences.
+3. Leave empty headings for 1NF, 2NF and 3NF in the same file (I will
+   fill them in task 3.2). Do not write content under them.
+4. Tests: the flat file has 10 rows and 16 columns, RN001 has an empty
+   return_date, RN005 has fine 600 and fine_paid yes, RN009 has fine
+   450 and fine_paid no.
+5. Add 2 entries to DECISIONS.md and this prompt to AI_LOG.md.
+Run pytest and fix failures.
