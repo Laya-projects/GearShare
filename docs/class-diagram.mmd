@@ -1,0 +1,85 @@
+classDiagram
+    GearItem <|-- Equipment
+    GearItem <|-- Accessory
+    GearItem <|-- DisplayItem
+    Customer <|-- BasicCustomer
+    Customer <|-- PlusCustomer
+    Customer <|-- ProCustomer
+    GearShare *-- GearItem
+    GearShare *-- Customer
+    GearShare *-- Rental
+
+    class GearItem {
+        <<abstract>>
+        +String sku
+        +String name
+        +int total_units
+        +is_rentable() boolean
+        +rental_period(Customer customer) int
+    }
+
+    class Equipment {
+        +is_rentable() boolean
+        +rental_period(Customer customer) int
+    }
+
+    class Accessory {
+        +is_rentable() boolean
+        +rental_period(Customer customer) int
+    }
+
+    class DisplayItem {
+        +is_rentable() boolean
+        +rental_period(Customer customer) int
+    }
+
+    class Customer {
+        <<abstract>>
+        +String customer_id
+        +String name
+        +String email
+        +max_items() int
+        +rental_period() int
+        +late_fee_per_day() int
+    }
+
+    class BasicCustomer {
+        +max_items() int
+        +rental_period() int
+        +late_fee_per_day() int
+    }
+
+    class PlusCustomer {
+        +max_items() int
+        +rental_period() int
+        +late_fee_per_day() int
+    }
+
+    class ProCustomer {
+        +max_items() int
+        +rental_period() int
+        +late_fee_per_day() int
+    }
+
+    class Rental {
+        +String rental_id
+        +String customer_id
+        +String sku
+        +Date issue_date
+        +Date due_date
+        +Date return_date
+    }
+
+    class GearShare {
+        +Dict items
+        +Dict customers
+        +List rentals
+        +load_data()
+        +list_items()
+        +rent()
+        +return_item()
+        +extend()
+        +join_waiting_list()
+        +customer_rentals()
+        +overdue_report()
+    }

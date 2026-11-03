@@ -74,3 +74,24 @@
 - **Options:** Read the environment inside the service, hard-code the training date, or read the environment once in `main.py` with a real-date fallback.
 - **Choice:** Resolve `today` in `main.py` and pass it into each date-dependent service call.
 - **Why:** Production behavior remains functional without configuration, samples remain deterministic, and no domain method is coupled to the system clock.
+
+## Decision 12: Class diagram relationships
+
+- **Problem:** The design needed inheritance and ownership shown without introducing renderer-dependent notation.
+- **Options:** Include detailed associations for every object reference, use implementation UML syntax, or show only the mandated inheritance and service composition relationships.
+- **Choice:** Show inheritance with `<|--` and service ownership with `*--`, using only Mermaid class diagram syntax supported by mermaid.live.
+- **Why:** This is readable, simple, and directly communicates type substitution and GearShare ownership.
+
+## Decision 13: Membership policy placement
+
+- **Problem:** Basic, Plus, and Pro values must remain separate from branching in the service.
+- **Options:** Store values on `GearShare`, use a lookup table, or place them on concrete customer subclasses.
+- **Choice:** Place polymorphic policy methods on concrete customer subclasses.
+- **Why:** Each membership owns its own limits and rates, and callers use one interface without tier comparisons.
+
+## Decision 14: Display of item rental rules
+
+- **Problem:** Display items and accessories need different behavior while sharing common item data.
+- **Options:** Branch on item category in `GearShare`, add flags to `GearItem`, or use concrete item subclasses.
+- **Choice:** Model display items and accessories as subclasses of `GearItem`.
+- **Why:** Each subtype can implement rental behavior directly while common validation and identity remain in the abstract base class.

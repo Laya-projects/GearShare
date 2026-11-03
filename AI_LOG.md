@@ -140,3 +140,17 @@ existing test.
 5. Tests...
 6. README deliverables and requirements.
 Add 2 entries to DECISIONS.md and this prompt to AI_LOG.md.
+
+Read SPEC.md, Phase 1, task 1.1 and the Rental Rulebook. Design only, no code.
+
+Create or overwrite docs/design.md with these sections:
+
+1. Class diagram: one Mermaid `classDiagram` in a ```mermaid block.
+2. Relationships: inheritance and composition.
+3. Abstract contracts: GearItem and Customer methods.
+4. CRC cards: Class, Responsibilities, Collaborators.
+5. Short answers to the 4 Phase 1 questions.
+
+Also save Mermaid code in docs/class-diagram.mmd, add 3 DECISIONS.md entries,
+log this prompt in AI_LOG.md, and commit as
+"1.1 Design: class diagram and CRC cards".

@@ -4,71 +4,81 @@
 
 ```mermaid
 classDiagram
-    GearItem <|-- Equipment : inheritance
-    GearItem <|-- Accessory : inheritance
-    GearItem <|-- DisplayItem : inheritance
-    Customer <|-- BasicCustomer : inheritance
-    Customer <|-- PlusCustomer : inheritance
-    Customer <|-- ProCustomer : inheritance
-    GearShare *-- GearItem : composition
-    GearShare *-- Customer : composition
-    GearShare *-- Rental : composition
-    Rental --> GearItem : association
-    Rental --> Customer : association
+    GearItem <|-- Equipment
+    GearItem <|-- Accessory
+    GearItem <|-- DisplayItem
+    Customer <|-- BasicCustomer
+    Customer <|-- PlusCustomer
+    Customer <|-- ProCustomer
+    GearShare *-- GearItem
+    GearShare *-- Customer
+    GearShare *-- Rental
 
     class GearItem {
         <<abstract>>
-        +is_rentable()* bool
-        +rental_period(item)* int
+        +String sku
+        +String name
+        +int total_units
+        +is_rentable() boolean
+        +rental_period(Customer customer) int
     }
 
     class Equipment {
-        +is_rentable() bool
-        +rental_period(customer) int
+        +is_rentable() boolean
+        +rental_period(Customer customer) int
     }
 
     class Accessory {
-        +is_rentable() bool
-        +rental_period(customer) int
+        +is_rentable() boolean
+        +rental_period(Customer customer) int
     }
 
     class DisplayItem {
-        +is_rentable() bool
-        +rental_period(customer) int
+        +is_rentable() boolean
+        +rental_period(Customer customer) int
     }
 
     class Customer {
         <<abstract>>
-        +item_limit()* int
-        +rental_period()* int
-        +daily_late_fee()* int
+        +String customer_id
+        +String name
+        +String email
+        +max_items() int
+        +rental_period() int
+        +late_fee_per_day() int
     }
 
     class BasicCustomer {
-        +item_limit() int
+        +max_items() int
         +rental_period() int
-        +daily_late_fee() int
+        +late_fee_per_day() int
     }
 
     class PlusCustomer {
-        +item_limit() int
+        +max_items() int
         +rental_period() int
-        +daily_late_fee() int
+        +late_fee_per_day() int
     }
 
     class ProCustomer {
-        +item_limit() int
+        +max_items() int
         +rental_period() int
-        +daily_late_fee() int
+        +late_fee_per_day() int
     }
 
     class Rental {
-        +issue_date
-        +due_date
-        +return_date
+        +String rental_id
+        +String customer_id
+        +String sku
+        +Date issue_date
+        +Date due_date
+        +Date return_date
     }
 
     class GearShare {
+        +Dict items
+        +Dict customers
+        +List rentals
         +load_data()
         +list_items()
         +rent()
@@ -82,75 +92,42 @@ classDiagram
 
 ## Relationships
 
-- `Equipment`, `Accessory`, and `DisplayItem` are inheritance relationships with `GearItem`: each is a kind of gear and substitutes for its common abstract item behavior.
-- `BasicCustomer`, `PlusCustomer`, and `ProCustomer` are inheritance relationships with `Customer`: each is a customer membership type with different policy values.
-- `GearShare` has a composition relationship with its collections of gear items, customers, and rentals because the service owns and coordinates the in-memory records for this console application.
-- A `Rental` has an association with its `GearItem`: it records which item is on loan.
-- A `Rental` has an association with its `Customer`: it records who has borrowed the item.
+- `Equipment` is an inheritance (is-a) relationship with `GearItem` because equipment is a kind of gear with a customer-dependent rental period.
+- `Accessory` is an inheritance (is-a) relationship with `GearItem` because an accessory is gear that always has a two-day rental period.
+- `DisplayItem` is an inheritance (is-a) relationship with `GearItem` because display merchandise is gear that cannot be rented.
+- `BasicCustomer` is an inheritance (is-a) relationship with `Customer` because a Basic customer is a customer with the Basic limits and rates.
+- `PlusCustomer` is an inheritance (is-a) relationship with `Customer` because a Plus customer is a customer with the Plus limits and rates.
+- `ProCustomer` is an inheritance (is-a) relationship with `Customer` because a Pro customer is a customer with the Pro limits and rates.
+- `GearShare` has a composition (has-a) relationship with `GearItem` because the service owns the in-memory item catalogue.
+- `GearShare` has a composition (has-a) relationship with `Customer` because the service owns the customer records used for rentals.
+- `GearShare` has a composition (has-a) relationship with `Rental` because the service owns the rental history and open rentals.
 
-## Abstract-class contracts
+## Abstract contracts
 
-`GearItem` requires every subclass to implement `is_rentable()` and `rental_period(customer)`: equipment and accessories have their own rentable-period behavior, while a display item reports that it is not rentable and supplies no rental period.
+`GearItem` forces `Equipment`, `Accessory`, and `DisplayItem` to implement `is_rentable()` and `rental_period(customer)` so callers can ask any item for its rental behavior without inspecting an item type.
 
-`Customer` requires every subclass to implement polymorphic `item_limit()`, `rental_period()`, and `daily_late_fee()` methods; the concrete membership classes supply the Basic, Plus, or Pro values without tier-based branching in the service logic.
+`Customer` forces `BasicCustomer`, `PlusCustomer`, and `ProCustomer` to implement `max_items()`, `rental_period()`, and `late_fee_per_day()` so each membership supplies its own policy through one interface.
 
-The item-limit, rental-period, and fee choices do not contain membership checks such as `if tier ==`; calling the same method on each concrete `Customer` selects the appropriate behavior.
+Membership and item behavior contain no `if tier ==` checks; polymorphic method dispatch selects the concrete implementation.
 
 ## CRC cards
 
-### GearItem
+| Class | Responsibilities | Collaborators |
+|---|---|---|
+| GearItem | Store common item data, validate its identity and stock, expose abstract rental behavior. | Equipment, Accessory, DisplayItem, Rental |
+| Equipment | Report that it is rentable and obtain the customer tier rental period. | GearItem, Customer |
+| Accessory | Report that it is rentable and enforce a fixed two-day period. | GearItem, Customer |
+| DisplayItem | Report that it is not rentable and provide no rental period. | GearItem, GearShare |
+| Customer | Store shared customer identity and define the membership policy contract. | BasicCustomer, PlusCustomer, ProCustomer |
+| BasicCustomer | Supply two-item limit, three-day period, and 50-per-day fee. | Customer, GearShare |
+| PlusCustomer | Supply four-item limit, five-day period, and 100-per-day fee. | Customer, GearShare |
+| ProCustomer | Supply eight-item limit, seven-day period, and 150-per-day fee. | Customer, GearShare |
+| Rental | Store one loan, its dates, return state, and extension count. | GearShare, Customer, GearItem |
+| GearShare | Load data, coordinate catalogue operations, enforce rules, manage waiting lists, and produce reports. | GearItem, Customer, Rental |
 
-- **Responsibilities:** Store common item data, validate common item state, expose rentable and rental-period behavior.
-- **Collaborators:** `Equipment`, `Accessory`, `DisplayItem`, `Rental`.
+## Think about this
 
-### Equipment
-
-- **Responsibilities:** Represent equipment, report itself as rentable, and apply the customer's equipment rental period.
-- **Collaborators:** `GearItem`, `Customer`.
-
-### Accessory
-
-- **Responsibilities:** Represent accessories, report itself as rentable, and enforce a two-day rental period regardless of membership.
-- **Collaborators:** `GearItem`, `Customer`.
-
-### DisplayItem
-
-- **Responsibilities:** Represent display-only gear and report that it cannot be rented.
-- **Collaborators:** `GearItem`, `GearShare`.
-
-### Customer
-
-- **Responsibilities:** Store shared customer data and define the membership policy contract.
-- **Collaborators:** `BasicCustomer`, `PlusCustomer`, `ProCustomer`, `Rental`.
-
-### BasicCustomer
-
-- **Responsibilities:** Provide Basic limits and rates: two items, three days, and a 50-per-day late fee.
-- **Collaborators:** `Customer`, `GearShare`.
-
-### PlusCustomer
-
-- **Responsibilities:** Provide Plus limits and rates: four items, five days, and a 100-per-day late fee.
-- **Collaborators:** `Customer`, `GearShare`.
-
-### ProCustomer
-
-- **Responsibilities:** Provide Pro limits and rates: eight items, seven days, and a 150-per-day late fee.
-- **Collaborators:** `Customer`, `GearShare`.
-
-### Rental
-
-- **Responsibilities:** Store the customer, item, issue date, due date, return date, extension count, and computed late state for one loan.
-- **Collaborators:** `Customer`, `GearItem`, `GearShare`.
-
-### GearShare
-
-- **Responsibilities:** Load data, coordinate catalogue lookup, enforce rule ordering and exceptions, manage rentals and waiting lists, and produce reports.
-- **Collaborators:** `GearItem`, `Customer`, `Rental`.
-
-## Think about this: Phase 1
-
-1. Raising a specific exception is better than returning `False` because it identifies which rule failed and preserves the deterministic error message; `False` would make every caller lose the rule, customer/item context, and reason needed for both UI and testing.
-2. If R4 (unpaid fines) were checked before R3 (item limit), Rohan Das's request for another item would report his fine limit before the normal item-limit result, and the message would also depend on which limit he has already reached.
-3. Fine calculation should live on `Rental`, because the fee depends on that rental's due and return dates and the customer's current tier policy; `GearShare` would own cross-object policy incorrectly, while `Customer` would lack the return-date data unless it also held the whole rental history.
-4. A Basic-to-Pro upgrade should apply the new Pro limit and fee behavior when each policy is evaluated from the customer's current polymorphic methods, but it should not rewrite existing rentals; their historical due dates remain unchanged, while return calculations may use the current or captured tier rate depending on the implemented policy, and this needs to be chosen explicitly rather than inferred by the recording types.
+1. `rent()` should raise a specific exception because a caller needs to know which rule failed and can present that reason; `False` loses the cause and prevents useful deterministic handling.
+2. Moving R4 before R3 would change Rohan Das's request: the system would report unpaid fines instead of a customer item-limit error.
+3. Fine calculation is best on `Rental` for the due and return dates that determine lateness, although `GearShare` coordinates policy and application; fine calculation does not fit naturally on `Customer` because one customer can have many rentals with different dates.
+4. An upgrade should change policy for current future checks such as limits and late fees, while existing due dates remain historical; this is easy when policy is polymorphic, but unclear without an explicit decision about whether fees use the tier held when each rental was issued or the tier current at return.
