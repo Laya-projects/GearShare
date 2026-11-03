@@ -123,3 +123,17 @@
 - **Options:** Several separate passes, category-specific branches, or one tuple key.
 - **Choice:** Sort once with a tuple key containing top-level category, negated weight, and name.
 - **Why:** Negating weight provides descending weight within an ascending category, while `sorted` supplies stable deterministic ordering for names.
+
+## Decision 19: Hash-based duplicate imports
+
+- **Problem:** Importing gear repeatedly may encounter the same SKU on multiple lines.
+- **Options:** Rescan previously imported items, use a list membership check, or maintain a SKU-to-name set.
+- **Choice:** Track each encountered SKU in a dictionary that maps it to the original item name.
+- **Why:** Dictionary lookup is O(1), and retaining the name lets the importer report exactly which earlier item a duplicate conflicts with.
+
+## Decision 20: Hash indexes for Phase 2 hashing tasks
+
+- **Problem:** Tag grouping, rental frequencies, packing pairs, and multi-word search each need repeated key-based lookup.
+- **Options:** Rescan the catalogue for every query or build purpose-specific hash structures.
+- **Choice:** Use dictionaries and Counters for grouping and frequency data, a weight dictionary for two-sum, and a word-to-SKU index.
+- **Why:** Hash-based structures keep each operation simple and make repeated lookup independent of catalogue length in the common case.

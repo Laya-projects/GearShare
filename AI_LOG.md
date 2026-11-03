@@ -167,3 +167,9 @@ Create benchmarks/sort_compare.py and docs/sort_report.md using median timings o
 for 1k, 5k, and 10k names with hand-sort printing suppressed during timing.
 Add search, sorting, edge-case, catalogue-order, and starter-data tests; add two DECISIONS.md
 entries and log this prompt. Run pytest without committing.
+
+Read SPEC.md Phase 2 task 2.3 and the existing code.
+Create dsa/hashing.py and import_gear.py. Implement duplicate SKU detection,
+tag grouping, most-rented frequency ranking, one-pass packing two-sum, and
+word-to-SKU multi-word search. Add gear_with_duplicate.csv, hashing tests,
+and two DECISIONS.md entries. Run pytest without git commands.
