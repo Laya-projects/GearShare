@@ -286,3 +286,8 @@ Do not run git commands or break existing tests. Create sql/tx_demo.sql,
 sql/run_tx_demo.py, transaction tests, sql/generate_big.py,
 sql/index_report.py, sql/indexes.sql, and docs/index_report.md. Add two
 DECISIONS.md entries, append this prompt to AI_LOG.md, and run pytest.
+
+Read SPEC.md Phase 3 task 3.7, the existing GearShare code, and Phase 3
+SQL files. Use SQLite repositories beneath GearShare, preserve Phase 1 and
+2 behavior, add persistence and rollback coverage, append two DECISIONS.md
+entries, record this prompt, and run pytest.

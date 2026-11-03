@@ -107,3 +107,13 @@
 - **Problem:** Query-plan measurements should not alter GearShare's persistent database.
 - **Choice:** Generate fixed-seed benchmark rentals in a temporary SQLite database and add indexes only to that database.
 - **Why:** The benchmark is reproducible, isolated from seed data, and can safely support EXPLAIN and timing comparisons.
+
+## 21. Keep wait queues persisted and undo records in memory
+- **Problem:** Waiting lists and undo operations need consistent behavior without duplicating business state everywhere.
+- **Choice:** Persist waiting-list rows in SQLite ordered by insertion ID, while keeping the undo stack in memory.
+- **Why:** Waiting requests survive service restarts and retain FIFO order, whereas undo is a short-lived command history tied to the current service session.
+
+## 22. Separate SQL repositories from GearShare rules
+- **Problem:** Domain operations need durable persistence without SQL leaking into business logic.
+- **Choice:** Repositories own DB API access and object loading, while GearShare validates rules and coordinates transactions.
+- **Why:** Parameterized repository methods keep database details replaceable, and GearShare remains the one place for check order and exception messages.

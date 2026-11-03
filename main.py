@@ -2,9 +2,11 @@
 
 import os
 from datetime import date
+from pathlib import Path
 
 from errors import GearShareError, ItemNotAvailableError
 from gearshare import GearShare
+from storage.db import connect_database
 
 
 MENU = """=== GearShare Mini ===
@@ -198,14 +200,19 @@ def run_menu(service, today, input_fn=input):
 
 def main():
     today = today_from_environment()
-    service = GearShare()
+    database_path = Path(__file__).resolve().parent / "gearshare.db"
+    if not database_path.exists():
+        connection = connect_database(":memory:")
+        connection.close()
+        connection = connect_database(database_path)
+        from storage.db import initialize_database
+        initialize_database(connection)
+        connection.commit()
+    else:
+        connection = connect_database(database_path)
+    service = GearShare(connection=connection)
     service.load_data()
-    counts = (
-        len(service.items),
-        len(service.customers),
-        len(service.rentals),
-        sum(1 for _ in open(service.data_dir / "fines.csv", encoding="utf-8")) - 1,
-    )
+    counts = (len(service.items), len(service.customers), len(service.rentals), service.rentals_repo.fine_count())
     print(f"Loaded {counts[0]} items, {counts[1]} customers, {counts[2]} rentals, {counts[3]} fines.")
     print(f"Today is {today}.")
     print()

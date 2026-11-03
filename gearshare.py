@@ -5,6 +5,11 @@ from collections import deque
 from datetime import datetime
 from pathlib import Path
 
+from storage.db import connect_database, initialize_database, transaction
+from storage.items_repo import ItemsRepository
+from storage.customers_repo import CustomersRepository
+from storage.rentals_repo import RentalsRepository
+
 from audit import audit
 from customers import BasicCustomer, PlusCustomer, ProCustomer
 from errors import (
@@ -23,7 +28,8 @@ from rentals import Rental
 
 
 class GearShare:
-    def __init__(self, data_dir=None):
+    def __init__(self, data_dir=None, connection=None, items_repo=None,
+                 customers_repo=None, rentals_repo=None):
         # Dicts provide direct SKU/customer lookup, the rental list preserves history,
         # and the SKU set supports fast uniqueness checks.
         self.items = {}
@@ -36,6 +42,10 @@ class GearShare:
         self.audit_log = self.audit
         self.undo_stack = []
         self.data_dir = Path(data_dir) if data_dir else Path(__file__).resolve().parent / "data"
+        self.connection = connection if connection is not None else connect_database(":memory:")
+        self.items_repo = items_repo or ItemsRepository(self.connection)
+        self.customers_repo = customers_repo or CustomersRepository(self.connection)
+        self.rentals_repo = rentals_repo or RentalsRepository(self.connection)
 
     @staticmethod
     def _date(value):
@@ -54,54 +64,15 @@ class GearShare:
         return value.strftime("%Y-%m-%d") if hasattr(value, "strftime") else str(value)
 
     def load_data(self):
-        customer_types = {
-            "Basic": BasicCustomer,
-            "Plus": PlusCustomer,
-            "Pro": ProCustomer,
+        self.items = self.items_repo.all()
+        self.customers = self.customers_repo.all()
+        self.rentals = self.rentals_repo.all()
+        self.unpaid_fines = self.customers_repo.unpaid_fines()
+        self.skus = set(self.items)
+        self.waiting_lists = {
+            sku: deque(customer_ids)
+            for sku, customer_ids in self.rentals_repo.waiting_all().items()
         }
-        with (self.data_dir / "customers.csv").open(newline="", encoding="utf-8") as file:
-            for row in csv.DictReader(file):
-                customer_type = customer_types[row["membership_type"]]
-                customer = customer_type(row["customer_id"], row["name"], row["email"])
-                self.customers[customer.customer_id] = customer
-                self.unpaid_fines[customer.customer_id] = 0
-
-        with (self.data_dir / "gear.csv").open(newline="", encoding="utf-8") as file:
-            for row in csv.DictReader(file):
-                common = (
-                    row["sku"],
-                    row["name"],
-                    row["tags"],
-                    row["category"],
-                    row["parent_category"],
-                    int(row["weight_g"]),
-                    int(row["price"]),
-                    int(row["total_units"]),
-                )
-                item_type = Accessory if row["item_type"] == "Accessory" else DisplayItem if row["item_type"] == "Display" else Equipment
-                item = item_type(*common)
-                self.items[item.sku] = item
-                self.skus.add(item.sku)
-
-        self.rentals = []
-        with (self.data_dir / "rentals.csv").open(newline="", encoding="utf-8") as file:
-            for row in csv.DictReader(file):
-                rental = Rental(
-                    row["customer_id"],
-                    row["sku"],
-                    self._date(row["issue_date"]),
-                    self._date(row["due_date"]),
-                    self._date(row["return_date"]),
-                    rental_id=row["rental_id"],
-                )
-                self.rentals.append(rental)
-
-        with (self.data_dir / "fines.csv").open(newline="", encoding="utf-8") as file:
-            for row in csv.DictReader(file):
-                if row["paid"].lower() == "no":
-                    rental = next(r for r in self.rentals if r.rental_id == row["rental_id"])
-                    self.unpaid_fines[rental.customer_id] += int(row["amount"])
-
         ids = [int(rental.rental_id[2:]) for rental in self.rentals if rental.rental_id[2:].isdigit()]
         Rental._next_number = max(ids, default=10) + 1
         for sku in self.items:
@@ -110,7 +81,7 @@ class GearShare:
             "items": len(self.items),
             "customers": len(self.customers),
             "rentals": len(self.rentals),
-            "fines": sum(1 for row in csv.DictReader((self.data_dir / "fines.csv").open(newline="", encoding="utf-8"))),
+            "fines": self.rentals_repo.fine_count(),
         }
 
     def list_items(self):
@@ -163,6 +134,11 @@ class GearShare:
         issue_date = self._date(today)
         due_date = issue_date.__class__.fromordinal(issue_date.toordinal() + item.rental_period(customer))
         rental = Rental(customer_id, sku, issue_date, due_date)
+        with transaction(self.connection):
+            self.rentals_repo.insert(rental)
+            self.rentals_repo.audit(
+                "rent", customer_id, sku, rental.rental_id, issue_date
+            )
         self.rentals.append(rental)
         self.undo_stack.append({
             "action": "rent",
@@ -206,6 +182,13 @@ class GearShare:
             next_customer = self.customers[next_customer_id].name
         else:
             next_customer_id = None
+        with transaction(self.connection):
+            self.rentals_repo.update(rental)
+            self.rentals_repo.waiting_remove_first(rental.sku)
+            self.rentals_repo.audit(
+                "return_item", rental.customer_id, rental.sku, rental_id, returned
+            )
+            self.rentals_repo.save_fine(rental_id, fee)
         self.undo_stack.append({
             "action": "return",
             "rental_id": rental_id,
@@ -237,6 +220,8 @@ class GearShare:
                 None,
             )
             if rental is not None:
+                with transaction(self.connection):
+                    self.rentals_repo.delete(rental.rental_id)
                 self.rentals.remove(rental)
                 number = rental.rental_id[2:]
                 if number.isdigit() and int(number) >= Rental._next_number - 1:
@@ -251,10 +236,14 @@ class GearShare:
             previous = entry["previous_state"]
             rental.return_date = previous["return_date"]
             self.unpaid_fines[entry["customer_id"]] = previous["fine"]
+            with transaction(self.connection):
+                self.rentals_repo.update(rental)
             notified = previous["notified"]
             if notified is not None:
                 waiting = self.waiting_lists.setdefault(entry["sku"], deque())
                 waiting.appendleft(notified)
+                with transaction(self.connection):
+                    self.rentals_repo.waiting_reinsert_first(entry["sku"], notified)
         return entry
 
     def waiting_list(self, sku):
@@ -289,6 +278,11 @@ class GearShare:
         due = due.__class__.fromordinal(due.toordinal() + item.rental_period(customer))
         rental.due_date = due
         rental.extension_count += 1
+        with transaction(self.connection):
+            self.rentals_repo.update(rental)
+            self.rentals_repo.audit(
+                "extend", rental.customer_id, rental.sku, rental_id, today or due
+            )
         return {"extension_count": rental.extension_count, "due_date": self._iso(due)}
 
     def join_waiting_list(self, customer_id, sku):
@@ -300,6 +294,8 @@ class GearShare:
         if customer_id in waiting:
             return len(waiting)
         waiting.append(customer_id)
+        with transaction(self.connection):
+            self.rentals_repo.waiting_add(sku, customer_id, "2026-11-03")
         return list(waiting).index(customer_id) + 1
 
     def customer_rentals(self, customer_id, today):
