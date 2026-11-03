@@ -100,3 +100,18 @@ Why: 300 ms balances responsiveness with a low request rate, preserving a useful
 Problem: A previous slow response could arrive after newer search results.
 Choice: Create and abort an AbortController for each search effect, and ignore AbortError without showing an error.
 Why: Abort cleanup is scoped to the request lifecycle and reliably cancels superseded work; a manual latest-request counter would duplicate this protection and is unnecessary when the API and browser honor AbortController.
+
+21. Map domain exceptions to HTTP statuses
+Problem: Rule failures need stable HTTP semantics without duplicating rules or messages in the API.
+Choice: Use 404 for missing customers and items, 422 for invalid SKU input, and 409 for item/rental rule conflicts.
+Why: Missing resources are not found, malformed SKU input is unprocessable, and active rule conflicts represent a 409 state conflict; exception handlers preserve the single source of console/domain messages.
+
+22. Restrict CORS to Vite development origins
+Problem: Browser requests from the React development server need access while other origins should not.
+Choice: Allow only http://localhost:5173 and http://127.0.0.1:5173, with credentials enabled.
+Why: These are the two Vite loopback origins specified by the project and avoid opening the API to arbitrary web origins.
+
+23. Read API TODAY in one application-level function
+Problem: Date-dependent GearShare operations need a consistent date without reading the clock inside domain methods.
+Choice: Read os.environ["TODAY"] in api/main.py and use the real date when it is absent.
+Why: This follows the console entry point convention, keeps TODAY at the process boundary, and passes the same date into all service operations.

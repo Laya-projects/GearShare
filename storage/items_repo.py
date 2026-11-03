@@ -30,3 +30,49 @@ class ItemsRepository:
             )
             result[item.sku] = item
         return result
+
+    def add(self, item):
+        category = self.connection.execute(
+            "SELECT category_id FROM categories WHERE name = ?",
+            (item.category,),
+        ).fetchone()
+        if category is None:
+            raise ValueError(f"Unknown category: {item.category}")
+
+        self.connection.execute(
+            """INSERT INTO items
+               (sku, name, item_type, weight_g, price, total_units, category_id)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (
+                item.sku,
+                item.name,
+                type(item).__name__.replace("Item", ""),
+                item.weight_g,
+                item.price,
+                item.total_units,
+                category["category_id"],
+            ),
+        )
+        for tag in item.tags.split(";") if item.tags else []:
+            tag = tag.strip()
+            if not tag:
+                continue
+            tag_row = self.connection.execute(
+                "SELECT tag_id FROM tags WHERE name = ?",
+                (tag,),
+            ).fetchone()
+            if tag_row is None:
+                tag_id = self.connection.execute(
+                    "SELECT COALESCE(MAX(tag_id), 0) + 1 FROM tags"
+                ).fetchone()[0]
+                self.connection.execute(
+                    "INSERT INTO tags (tag_id, name) VALUES (?, ?)",
+                    (tag_id, tag),
+                )
+            else:
+                tag_id = tag_row["tag_id"]
+            self.connection.execute(
+                """INSERT OR IGNORE INTO item_tags (sku, tag_id)
+                   VALUES (?, ?)""",
+                (item.sku, tag_id),
+            )

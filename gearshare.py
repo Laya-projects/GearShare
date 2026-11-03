@@ -87,6 +87,29 @@ class GearShare:
     def list_items(self):
         return list(self.items.values())
 
+    def add_item(self, sku, name, tags="", category="", item_type="Equipment",
+                 weight_g=0, price=0, total_units=1):
+        if isinstance(total_units, bool) or not isinstance(total_units, int) or total_units < 1:
+            raise ValueError("Item units must be at least 1.")
+        item_classes = {
+            "Equipment": Equipment,
+            "Accessory": Accessory,
+            "Display": DisplayItem,
+        }
+        if item_type not in item_classes:
+            raise ValueError("Invalid item type.")
+        item = item_classes[item_type](
+            sku, name, tags, category, "", weight_g, price, total_units
+        )
+        if sku in self.items:
+            raise ValueError(f"An item with SKU {sku} already exists.")
+        with transaction(self.connection):
+            self.items_repo.add(item)
+        self.items[sku] = item
+        self.skus.add(sku)
+        self.waiting_lists.setdefault(sku, deque())
+        return item
+
     def search(self, query):
         needle = query.lower()
         return [

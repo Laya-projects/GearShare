@@ -12,6 +12,11 @@
    props-only component decision, and do not run Git commands or change api/ or
    Python files.
 
+   Read SPEC.md Phase 4 task 4.0 and the API samples. Create the FastAPI
+   adapter and persistence support, exception handlers, CORS configuration,
+   temporary-database API tests, API README, status/TODAY decisions, and run
+   pytest. Do not run Git commands.
+
    Read SPEC.md Phase 4 task 4.3 and the behaviour table. Add the fetch client,
    debounced search, URL-backed catalogue controls, AbortController cleanup,
    loading/error/empty states, routing, two state-management decisions, and do
