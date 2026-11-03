@@ -86,3 +86,9 @@
 - **Options:** Restrict every dependent row, use cascades everywhere, or distinguish transient links from history.
 - **Choice:** Use `CASCADE` for `item_tags`, waiting-list entries, and `SET NULL` for optional category parent references; restrict all historical relationships.
 - **Why:** Removing an item or tag should clean up its many-to-many links, and removing a customer should clean up their current waiting requests, while rentals and audit records remain protected by restrictions.
+
+## 17. Store fine payment as a boolean integer
+- **Problem:** The starter fine CSV stores paid status as `yes` and `no`.
+- **Options:** Store the text status, store SQLite integer 1/0, or add a separate payment table.
+- **Choice:** Store paid as SQLite `INTEGER` with `CHECK (paid IN (0, 1))`, where `1` means yes and `0` means no.
+- **Why:** Integer booleans are idiomatic in SQLite, support efficient filtering, and the check constraint prevents values outside the two valid states.

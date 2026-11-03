@@ -220,6 +220,18 @@ Do not break any earlier test. Do not run any git commands.
 5. Add 2 entries to DECISIONS.md and this prompt to AI_LOG.md.
 Run pytest and fix failures.
 
+Read SPEC.md Phase 3 task 3.4, sql/schema.sql and the four starter CSVs
+in data/. Do not break any earlier test. Do not run any git commands.
+
+1. Create sql/seed.sql with static starter inserts for tiers, categories,
+   items, tags, item tags, customers, rentals and fines.
+2. Create sql/load_db.py, a database path argument with gearshare.db as
+   default, execute schema and seed, and print every table row count.
+3. Add tests for starter counts, open rentals, Photography parents, Canon
+   tags, and clean failure when seed.sql is loaded twice.
+4. Add one DECISIONS.md entry and this prompt to AI_LOG.md.
+Run pytest and fix failures.
+
 Read SPEC.md Phase 3 task 3.2 and data/gearshare_flat.csv.
 Do not break any earlier test. Do not run any git commands.
 This task is documentation only, no schema code yet.
