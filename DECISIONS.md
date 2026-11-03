@@ -90,3 +90,13 @@ Why: URL state survives route navigation and browser history, so `Back to result
 Problem: The initial catalogue components need predictable rendering before routing, API calls, and shared state exist.
 Choice: Pass items and event handlers down explicitly through props, with no component fetching or global context.
 Why: Props-only presentational components isolate UI from data source changes, make Phase 4.2 testable with hard-coded data, and avoid adding router or state architecture before later tasks require it.
+
+19. Debounce catalogue search by 300 ms
+Problem: Every keystroke could create unnecessary API traffic and allow responses to race.
+Choice: Debounce the catalogue search for 300 ms before requesting gear.
+Why: 300 ms balances responsiveness with a low request rate, preserving a useful typing experience while reducing server load and overlapping requests.
+
+20. Abort superseded catalogue requests
+Problem: A previous slow response could arrive after newer search results.
+Choice: Create and abort an AbortController for each search effect, and ignore AbortError without showing an error.
+Why: Abort cleanup is scoped to the request lifecycle and reliably cancels superseded work; a manual latest-request counter would duplicate this protection and is unnecessary when the API and browser honor AbortController.

@@ -11,6 +11,11 @@
    add the seven-item API-shaped sample data, wire GearList through App, add the
    props-only component decision, and do not run Git commands or change api/ or
    Python files.
+
+   Read SPEC.md Phase 4 task 4.3 and the behaviour table. Add the fetch client,
+   debounced search, URL-backed catalogue controls, AbortController cleanup,
+   loading/error/empty states, routing, two state-management decisions, and do
+   not run Git commands or change api/ or Python files.
 4. Add a README skeleton with a "How to run with TODAY=2026-11-03" section.
 5. Add one sanity test that checks the CSVs have 7 items, 5 customers,
    10 rentals and 4 fines.
