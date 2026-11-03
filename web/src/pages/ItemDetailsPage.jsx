@@ -4,14 +4,20 @@ import { getGearItem } from '../api/client'
 import AvailabilityBadge from '../components/AvailabilityBadge'
 import ErrorMessage from '../components/ErrorMessage'
 import LoadingMessage from '../components/LoadingMessage'
+import { useCustomer } from '../context/CustomerContext'
+import { useBasket } from '../context/BasketContext'
+import { joinWaitingList } from '../api/client'
 
 export default function ItemDetailsPage() {
   const { sku } = useParams()
   const location = useLocation()
+  const { selectedCustomer } = useCustomer()
+  const basket = useBasket()
   const [item, setItem] = useState(null)
   const [status, setStatus] = useState('loading')
   const [error, setError] = useState(null)
   const [retryVersion, setRetryVersion] = useState(0)
+  const [actionMessage, setActionMessage] = useState('')
 
   useEffect(() => {
     const controller = new AbortController()
@@ -34,6 +40,7 @@ export default function ItemDetailsPage() {
   }, [sku, retryVersion])
 
   const catalogueSearch = location.state?.catalogueSearch || ''
+  const full = selectedCustomer && basket.items.length >= selectedCustomer.max_items
 
   if (status === 'loading') return <LoadingMessage message="Loading item..." />
   if (status === 'not-found') return <ErrorMessage message={error.message} />
@@ -67,14 +74,39 @@ export default function ItemDetailsPage() {
           Display item: view in the shop only.
         </p>
       ) : item.available === 0 ? (
-        <button type="button" className="mt-5 rounded-md bg-blue-700 px-4 py-2 text-white">
+        <button
+          type="button"
+          onClick={async () => {
+            try {
+              if (!selectedCustomer) {
+                setActionMessage('Pick a customer first.')
+                return
+              }
+              const result = await joinWaitingList(selectedCustomer.customer_id, item.sku)
+              setActionMessage(`Waiting list position: ${result.position}.`)
+            } catch (requestError) {
+              setActionMessage(requestError.message)
+            }
+          }}
+          className="mt-5 rounded-md bg-blue-700 px-4 py-2 text-white"
+        >
           Join waiting list
         </button>
       ) : (
-        <button type="button" className="mt-5 rounded-md bg-blue-700 px-4 py-2 text-white">
+        <button
+          type="button"
+          disabled={full}
+          onClick={() => basket.add(item)}
+          className="mt-5 rounded-md bg-blue-700 px-4 py-2 text-white disabled:bg-slate-300"
+        >
           Add to basket
         </button>
       )}
+      {!selectedCustomer && !full && item.available > 0 && (
+        <p className="mt-2 text-sm text-red-700">Pick a customer first.</p>
+      )}
+      {basket.message && <p className="mt-2 text-sm text-red-700">{basket.message}</p>}
+      {actionMessage && <p className="mt-2 text-sm">{actionMessage}</p>}
     </article>
   )
 }

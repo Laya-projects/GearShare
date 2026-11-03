@@ -111,6 +111,16 @@ Problem: Item details navigation must return to a catalogue preserving its searc
 Choice: Pass the catalogue location search string in GearCard Link state and use it for the Back to results URL, with the plain catalogue route as a fallback.
 Why: Router state keeps the previous catalogue query together with navigation without duplicating it in application-wide state.
 
+26. Share customer and basket state through context
+Problem: The selected customer and basket are needed across navigation, cards, rentals, and checkout, making prop threading brittle.
+Choice: Use CustomerContext for customer identity and BasketContext backed by useReducer for basket state.
+Why: Context gives route-level consumers direct access to shared state while presentational components retain props for their local data and actions.
+
+27. Enforce the basket limit in React and Python
+Problem: A client-side limit improves immediate feedback, but it cannot protect server state when clients bypass the UI or request concurrently.
+Choice: Keep the React basket limit from the selected customer's max_items and retain the GearShare server limit as authoritative.
+Why: React prevents predictable UX friction, while the server remains the final security and integrity boundary for rentals.
+
 21. Map domain exceptions to HTTP statuses
 Problem: Rule failures need stable HTTP semantics without duplicating rules or messages in the API.
 Choice: Use 404 for missing customers and items, 422 for invalid SKU input, and 409 for item/rental rule conflicts.

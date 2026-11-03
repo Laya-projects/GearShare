@@ -331,3 +331,7 @@ Read SPEC.md Phase 4 task 4.5 and the behaviour table. Add the catalogue,
 item details, rentals, basket, add-item, and not-found routes; use active
 NavLinks without reloads; add item detail fetching and back-query restoration;
 and do not run Git commands or change api/ or Python files.
+Read SPEC.md Phase 4 task 4.6 and the behaviour table. Add customer and
+basket contexts, reducer, navbar picker, checkout and rentals flows, waiting
+list actions, Vitest reducer coverage, shared-state decisions, and do not run
+Git commands or change api/ or Python files.

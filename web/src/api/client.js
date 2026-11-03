@@ -71,3 +71,39 @@ export async function getGearItem(sku, signal) {
 
   return response.json()
 }
+
+async function requestJson(url, options = {}) {
+  const response = await fetch(`${API_URL}${url}`, options)
+  if (!response.ok) {
+    let body
+    try {
+      body = await response.json()
+    } catch {
+      body = { message: 'The rental server returned an invalid response.' }
+    }
+    const error = new Error(body.message || body.detail || 'The rental server request failed.')
+    error.error = body.error
+    error.status = response.status
+    error.body = body
+    throw error
+  }
+  return response.json()
+}
+
+export const getCustomers = (signal) => requestJson('/customers', { signal })
+export const postRental = (customer_id, sku, signal) =>
+  requestJson('/rentals', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ customer_id, sku }),
+    signal,
+  })
+export const joinWaitingList = (customer_id, sku, signal) =>
+  requestJson('/waiting-list', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ customer_id, sku }),
+    signal,
+  })
+export const getCustomerRentals = (customerId, signal) =>
+  requestJson(`/customers/${encodeURIComponent(customerId)}/rentals`, { signal })
