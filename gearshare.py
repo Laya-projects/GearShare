@@ -115,6 +115,13 @@ class GearShare:
     def list_items(self):
         return list(self.items.values())
 
+    def search(self, query):
+        needle = query.lower()
+        return [
+            item for item in self.items.values()
+            if needle in item.name.lower() or needle in item.tags.lower()
+        ]
+
     def _active_rentals(self, customer_id, sku=None):
         return [
             rental for rental in self.rentals

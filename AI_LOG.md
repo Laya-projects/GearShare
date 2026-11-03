@@ -154,3 +154,7 @@ Create or overwrite docs/design.md with these sections:
 Also save Mermaid code in docs/class-diagram.mmd, add 3 DECISIONS.md entries,
 log this prompt in AI_LOG.md, and commit as
 "1.1 Design: class diagram and CRC cards".
+
+Read SPEC.md Phase 2 task 2.1 and the existing Phase 1 code.
+Create dsa/__init__.py and benchmarks/generate_items.py, benchmark script,
+report, tests, decisions, and log this prompt.

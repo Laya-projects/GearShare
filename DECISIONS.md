@@ -95,3 +95,17 @@
 - **Options:** Branch on item category in `GearShare`, add flags to `GearItem`, or use concrete item subclasses.
 - **Choice:** Model display items and accessories as subclasses of `GearItem`.
 - **Why:** Each subtype can implement rental behavior directly while common validation and identity remain in the abstract base class.
+
+## Decision 15: Repeatable benchmark data
+
+- **Problem:** Complexity measurements must not change between runs.
+- **Options:** Use nondeterministic random data, depend on the current clock, or seed one generator used by every benchmark.
+- **Choice:** Use a fixed random seed in the item generator and measure fresh synthetic services.
+- **Why:** Reproducible data isolates algorithmic scaling from random catalogue changes.
+
+## Decision 16: Measurement isolation
+
+- **Problem:** Timed operations can include setup work or alter state for later repetitions.
+- **Options:** Run one service permanently, reset state after every sample, or construct fresh state before timed measurements.
+- **Choice:** Construct and reset state outside each timed operation where operation state permits, with one fresh service per measured call.
+- **Why:** Setup isolation prevents one sample from changing availability, audit history, or rental state for the next sample.

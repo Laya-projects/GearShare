@@ -1,0 +1,1 @@
+"""GearShare data structures package."""
