@@ -66,14 +66,26 @@ def render_report(results):
     lines = [
         "# Phase 2.1 Complexity Audit",
         "",
-        "| operation | predicted time | predicted space | n=1000 | n=5000 | n=10000 | n=50000 |",
-        "|---|---|---|---:|---:|---:|---:|",
+        "| operation | predicted time | predicted space | n=1000 | n=5000 | n=10000 | n=50000 | ratio 1000->10000 | ratio 5000->10000 | observed shape |",
+        "|---|---|---|---:|---:|---:|---:|---:|---:|---|",
     ]
     for operation in PREDICTIONS:
         values = [f"{results[operation][n]:.3f}" for n in SIZES]
+        ratio_1000_10000 = (
+            results[operation][10000] / results[operation][1000]
+            if results[operation][1000]
+            else 0
+        )
+        ratio_5000_10000 = (
+            results[operation][10000] / results[operation][5000]
+            if results[operation][5000]
+            else 0
+        )
         lines.append(
             f"| {operation} | {PREDICTIONS[operation]['time']} | "
-            f"{PREDICTIONS[operation]['space']} | {' | '.join(values)} |"
+            f"{PREDICTIONS[operation]['space']} | {' | '.join(values)} | "
+            f"{ratio_1000_10000:.2f}x | {ratio_5000_10000:.2f}x | "
+            f"{observed_shape(ratio_1000_10000, ratio_5000_10000)} |"
         )
     lines.extend(["", "## Surprises", ""])
     for operation in PREDICTIONS:
@@ -82,6 +94,16 @@ def render_report(results):
         lines.append("Sentence 2: TODO.")
         lines.append("")
     return "\n".join(lines)
+
+
+def observed_shape(ratio_1000_10000, ratio_5000_10000):
+    if ratio_1000_10000 < 3:
+        return "O(1)"
+    if ratio_1000_10000 >= 60 or ratio_5000_10000 >= 20:
+        return "O(n^2)"
+    if ratio_1000_10000 >= 20 or ratio_5000_10000 >= 2.7:
+        return "O(n log n)"
+    return "O(n)"
 
 
 def main():
