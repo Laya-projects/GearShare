@@ -27,3 +27,30 @@ Create docs/design.md containing:
 
 Add 3 entries to DECISIONS.md (problem, options, choice, why).
 Add this prompt to AI_LOG.md.
+
+Read SPEC.md Phase 1 task 1.2 and docs/design.md. Implement the classes only.
+The service class and menu come later.
+
+1. errors.py: GearShareError (parent) with these children:
+   InvalidSKUError, ItemNotFoundError, CustomerNotFoundError,
+   ItemNotRentableError (R1), UnpaidFinesError (R4),
+   RentalLimitExceededError (R3), DuplicateRentalError (R8),
+   ItemNotAvailableError (R7), ExtensionNotAllowedError (R2, R6).
+2. items.py: abstract GearItem with Equipment, Accessory, DisplayItem.
+   Use @property with setters so invalid objects can never exist:
+   SKU exactly 10 digits (InvalidSKUError), units not negative,
+   name not blank. Polymorphic methods: is_rentable() and
+   rental_period(customer). Accessory is always 2 days (R2).
+3. customers.py: abstract Customer with BasicCustomer, PlusCustomer,
+   ProCustomer. Polymorphic methods: max_items(), rental_period(),
+   late_fee_per_day() using the Rulebook table. Email must contain @,
+   name not blank. NO `if tier ==` anywhere.
+4. rentals.py: Rental class with a class attribute for the next rental
+   number (RN011 is next after the starter data) and instance attributes
+   for the rest. Comment why each belongs where it is.
+5. Add __str__ and __repr__ to every class.
+6. Tests in tests/: every validation rule, every polymorphic method for
+   all three tiers, and pytest.raises for each exception used here.
+   Use parametrize for the tier table.
+Add 2 entries to DECISIONS.md and this prompt to AI_LOG.md.
+Run pytest, fix failures, then commit as "1.2 Core classes and validation".
