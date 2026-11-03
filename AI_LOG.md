@@ -298,3 +298,9 @@ save output in docs/injection_evidence.md, add the TODO explanation
 placeholders, add four-result and SQL-formatting tests, add one DECISIONS.md
 entry, append this prompt to AI_LOG.md, and run pytest. Do not touch
 gearshare.db, storage/, or gearshare.py.
+
+Read SPEC.md Phase 4 task 4.1 and the behaviour table. Create the Vite React
+app in web/, add Tailwind and the API environment files, create the five
+wireframes and component tree documents, render the minimal GearShare Mini
+App, add the Tailwind/search decisions, and do not run Git commands or change
+api/ or Python files.

@@ -50,75 +50,38 @@
 - **Choice:** Keep one `collections.deque` per SKU.
 - **Why:** `append` and `popleft` give constant-time FIFO, and undo can restore a notified customer to the front with `appendleft`.
 
-## 11. Build a rental-centric flat file for Phase 3.1
-- **Problem:** The four starter CSVs must be combined into one rental-level analytical file.
-- **Options:** Join at runtime, generate a flat CSV once, or duplicate all source keys in the Python code.
-- **Choice:** Generate `gearshare_flat.csv` with joins keyed by customer ID, SKU, and rental ID.
-- **Why:** Each rental remains one row, source values stay data-driven, and fine values are optional without invented rows.
+11. Choose SQLite for the database
+Problem: The database must support the Python application and be portable enough for development and tests.
+Choice: Use SQLite.
+Why: It is built into Python, needs no server setup, is enough for this small dataset, and makes fresh temporary test databases practical. PostgreSQL would be preferable for higher concurrency, larger deployments, network access, and stronger multi-user administration.
 
-## 12. Preserve empty flat-file values
-- **Problem:** Open rentals and rentals without fines need an unambiguous representation.
-- **Options:** Use null sentinels, text such as None, or empty CSV cells.
-- **Choice:** Use empty cells for `return_date` and for fine fields when no fine exists.
-- **Why:** Empty cells are consistent with the starter CSV format and keep downstream CSV readers simple.
+12. Calculate available units instead of storing them
+Problem: Availability is needed for listings and rental checks, while rentals can change concurrently.
+Choice: Available units = total_units minus rentals with no return date.
+Why: A stored counter can drift after returns, failures, or manual updates and risks lost updates under concurrent requests. The calculation should be checked inside a transaction and reserve the final unit atomically.
+Denormalise later only if needed: Store available_units only for proven read-heavy workloads, updated through atomic transactions.
 
-## 13. Calculate available units
-- **Problem:** Availability is needed for listings and rental checks, while rentals can change concurrently.
-- **Options:** Store `available_units` or calculate it from `total_units` and open rentals.
-- **Choice:** Calculate availability from items and rentals (`total_units` minus rentals with no return date).
-- **Why:** A stored counter can drift after returns, failures, or manual updates. If two rent requests arrive together, a stored counter also creates a lost-update or oversubscription risk unless transactions lock and recheck it; calculated availability should likewise be checked inside a transaction and must reserve the final unit atomically.
-- **Denormalise differently:** Store and maintain `available_units` only for proven, read-heavy workloads where it is updated through atomic transactions, or cache snapshots after measuring stale-data tolerance.
+13. Use RESTRICT to preserve rental history
+Problem: Customer, item, rental, and audit records represent durable business history.
+Choice: RESTRICT on rentals.customer_id, rentals.sku, and fine and audit-log references.
+Why: Cascading would silently erase rentals, fines, or audit evidence. Restricting is the safer default and forces an explicit retention or archival process before deletion.
 
-## 14. Choose SQLite for Phase 3
-- **Problem:** The database must support the Python application and be portable enough for development and tests.
-- **Options:** Use SQLite or PostgreSQL.
-- **Choice:** Use SQLite.
-- **Why:** It is built into Python, requires no server setup, is enough for this small dataset, and makes fresh temporary databases practical for tests. PostgreSQL would be preferable for higher concurrency, larger deployments, network access, and stronger multi-user administration.
+14. Commit rental and audit writes atomically
+Problem: A rental and its audit row must either both persist or both remain absent.
+Choice: Wrap both inserts in one transaction, with a deliberate audit constraint failure to demonstrate rollback and a valid insert to demonstrate commit.
+Why: Preserving matching rental and audit records prevents partial service writes.
 
-## 15. Preserve rental history on foreign-key deletion
-- **Problem:** Customer, item, rental, and audit records represent durable business history.
-- **Options:** Restrict deletion, set references to null, or cascade the dependent rows.
-- **Choice:** Use `RESTRICT` for `rentals.customer_id`, `rentals.sku`, fine and audit-log references.
-- **Why:** Cascading would silently erase rentals, fines, or audit evidence; restricting is the safer default and requires an explicit retention or archival process before deletion.
+15. Separate SQL repositories from GearShare rules
+Problem: Domain operations need durable persistence without SQL leaking into business logic.
+Choice: Repositories own DB API access and object loading, while GearShare validates rules and coordinates transactions.
+Why: Parameterized repository methods keep database details replaceable, and GearShare remains the one place for check order and exception messages.
 
-## 16. Cascade only non-historical link data
-- **Problem:** Junction rows and waiting requests should not remain after their source entities disappear.
-- **Options:** Restrict every dependent row, use cascades everywhere, or distinguish transient links from history.
-- **Choice:** Use `CASCADE` for `item_tags`, waiting-list entries, and `SET NULL` for optional category parent references; restrict all historical relationships.
-- **Why:** Removing an item or tag should clean up its many-to-many links, and removing a customer should clean up their current waiting requests, while rentals and audit records remain protected by restrictions.
+16. Use Tailwind CSS for Phase 4 styling
+Problem: The React interface needs a responsive, consistent styling approach across several screens.
+Choice: Tailwind CSS.
+Why: Tailwind provides utility-first styling directly in JSX, responsive variants, and a smaller integration surface than a component library. Material UI would add heavier theme and component conventions for this small project.
 
-## 17. Store fine payment as a boolean integer
-- **Problem:** The starter fine CSV stores paid status as `yes` and `no`.
-- **Options:** Store the text status, store SQLite integer 1/0, or add a separate payment table.
-- **Choice:** Store paid as SQLite `INTEGER` with `CHECK (paid IN (0, 1))`, where `1` means yes and `0` means no.
-- **Why:** Integer booleans are idiomatic in SQLite, support efficient filtering, and the check constraint prevents values outside the two valid states.
-
-## 18. Treat display items as available in the query pack
-- **Problem:** Q11 must report inventory availability for every item, including Vintage Leica (Showcase).
-- **Choice:** Display items always contribute their full `total_units` in Q11, regardless of the open-rental count.
-- **Why:** The seeded display item has no rentals and the spec expects 1 available. This matches the rental policy that display items cannot be rented while also preserving useful availability output.
-
-## 19. Commit transaction demo changes atomically
-- **Problem:** A rental and its audit row must either both persist or both remain absent.
-- **Choice:** Use a transaction, an INSERT with a deliberate audit constraint failure for the rollback case, and a valid audit insert for the commit case.
-- **Why:** The rental foreign keys point to durable history, so preserving matching rental and audit records prevents partial service writes.
-
-## 20. Benchmark indexes with temporary data
-- **Problem:** Query-plan measurements should not alter GearShare's persistent database.
-- **Choice:** Generate fixed-seed benchmark rentals in a temporary SQLite database and add indexes only to that database.
-- **Why:** The benchmark is reproducible, isolated from seed data, and can safely support EXPLAIN and timing comparisons.
-
-## 21. Keep wait queues persisted and undo records in memory
-- **Problem:** Waiting lists and undo operations need consistent behavior without duplicating business state everywhere.
-- **Choice:** Persist waiting-list rows in SQLite ordered by insertion ID, while keeping the undo stack in memory.
-- **Why:** Waiting requests survive service restarts and retain FIFO order, whereas undo is a short-lived command history tied to the current service session.
-
-## 22. Separate SQL repositories from GearShare rules
-- **Problem:** Domain operations need durable persistence without SQL leaking into business logic.
-- **Choice:** Repositories own DB API access and object loading, while GearShare validates rules and coordinates transactions.
-- **Why:** Parameterized repository methods keep database details replaceable, and GearShare remains the one place for check order and exception messages.
-
-## 23. Isolate SQL injection as a throwaway experiment
-- **Problem:** The SQL injection experiment must demonstrate the failure mode without weakening production SQL rules.
-- **Choice:** Keep the deliberately unsafe f-string query only in `experiments/injection_demo.py`, against an in-memory seeded database.
-- **Why:** This makes the vulnerability visible in an isolated sample while repository code and the application database remain parameterized and unchanged.
+17. Keep catalogue search state in the URL
+Problem: Searching, opening an item, and returning to the catalogue must preserve the customer's previous search.
+Choice: Store the search text, category, and sort in URL query parameters.
+Why: URL state survives route navigation and browser history, so `Back to results` can restore the catalogue without duplicating state in navigation-specific components.
