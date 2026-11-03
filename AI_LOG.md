@@ -181,3 +181,11 @@ waiting-list display. Add the linked rental history structure, stretch delete,
 reverse and second-from-end operations, and list-versus-deque benchmark/report.
 Add undo, waiting-list, and history tests plus two DECISIONS.md entries.
 Run pytest without git commands.
+
+Read SPEC.md Phase 2 task 2.5 and the existing code.
+Create dsa/recursion.py with recursive factorial, Fibonacci, and digit sum
+functions and required base-case comments. Create dsa/categories.py with a
+real-data category Node tree, recursive print/count/path functions, and an
+iterative stack count. Add docs/recursion_notes.md placeholders plus recursion
+and category edge-case tests, and two DECISIONS.md entries. Run pytest without
+git commands.

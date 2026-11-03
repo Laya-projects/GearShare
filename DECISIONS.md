@@ -151,3 +151,17 @@
 - **Options:** Use a list, a linked queue, or `collections.deque`.
 - **Choice:** Continue using one `deque` per SKU for waiting customers.
 - **Why:** `deque.append` and `popleft` provide constant-time FIFO operations, while undo can restore a notified customer at the front with `appendleft`.
+
+## Decision 23: Category tree structure
+
+- **Problem:** The category display and counts must reflect the real starter catalogue and include nested photography categories.
+- **Options:** Hard-code category names and counts, scan a flat category path repeatedly, or build a tree once from item parent/category fields.
+- **Choice:** Build a `Gear Hub` tree from the real item parent and category fields, storing direct item counts on each node.
+- **Why:** Recursive count and printing can then derive totals from the same source, while missing categories and empty branches remain distinguishable.
+
+## Decision 24: Recursive category traversal
+
+- **Problem:** Category totals can be computed for leaves, branches, and the root.
+- **Options:** Maintain cached totals, traverse recursively, or traverse iteratively with a stack.
+- **Choice:** Implement recursive counting as the primary operation and provide an iterative stack equivalent.
+- **Why:** Recursion mirrors the category hierarchy naturally, and the iterative implementation supplies a depth-safe comparison.
