@@ -61,3 +61,16 @@
 - **Options:** Use null sentinels, text such as None, or empty CSV cells.
 - **Choice:** Use empty cells for `return_date` and for fine fields when no fine exists.
 - **Why:** Empty cells are consistent with the starter CSV format and keep downstream CSV readers simple.
+
+## 13. Calculate available units
+- **Problem:** Availability is needed for listings and rental checks, while rentals can change concurrently.
+- **Options:** Store `available_units` or calculate it from `total_units` and open rentals.
+- **Choice:** Calculate availability from items and rentals (`total_units` minus rentals with no return date).
+- **Why:** A stored counter can drift after returns, failures, or manual updates. If two rent requests arrive together, a stored counter also creates a lost-update or oversubscription risk unless transactions lock and recheck it; calculated availability should likewise be checked inside a transaction and must reserve the final unit atomically.
+- **Denormalise differently:** Store and maintain `available_units` only for proven, read-heavy workloads where it is updated through atomic transactions, or cache snapshots after measuring stale-data tolerance.
+
+## 14. Choose SQLite for Phase 3
+- **Problem:** The database must support the Python application and be portable enough for development and tests.
+- **Options:** Use SQLite or PostgreSQL.
+- **Choice:** Use SQLite.
+- **Why:** It is built into Python, requires no server setup, is enough for this small dataset, and makes fresh temporary databases practical for tests. PostgreSQL would be preferable for higher concurrency, larger deployments, network access, and stronger multi-user administration.

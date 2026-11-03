@@ -219,3 +219,31 @@ Do not break any earlier test. Do not run any git commands.
    450 and fine_paid no.
 5. Add 2 entries to DECISIONS.md and this prompt to AI_LOG.md.
 Run pytest and fix failures.
+
+Read SPEC.md Phase 3 task 3.2 and data/gearshare_flat.csv.
+Do not break any earlier test. Do not run any git commands.
+This task is documentation only, no schema code yet.
+
+1. Fill in the 1NF, 2NF and 3NF headings in docs/normalisation.md, using
+   REAL rows from the flat file as examples (RN002, RN005, RN009, etc.).
+2. 1NF: what repeats inside a cell (the ; separated tags)? Show a
+   BEFORE row and the AFTER rows, and the new tags / item_tags tables.
+3. 2NF: state the key of the flat table, which columns depend on only
+   part of it (customer details, item details), and show the split
+   into customers, items and rentals.
+4. 3NF: which columns depend on other non-key columns? Cover:
+   - tier -> max items, rental period, late fee per day
+     (membership_tiers)
+   - category -> parent_category (categories, self-referencing parent)
+   - fines as their own table (one per rental)
+5. Final tables section: list each table with columns, primary key and
+   foreign keys: customers, membership_tiers, items, tags, item_tags,
+   categories, rentals, fines, waiting_list, audit_log.
+6. Add a DECISIONS.md entry: is "available units" stored in a column or
+   calculated? Give the argument for both sides, pick ONE, and say when
+   I would choose differently (when to denormalise). Do not hide the
+   trade-off: mention what breaks when two rent requests arrive together.
+7. Add a second DECISIONS.md entry on whether to use SQLite or
+   PostgreSQL, and why.
+8. Add this prompt to AI_LOG.md.
+Keep each section short and clear.
