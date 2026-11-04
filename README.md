@@ -1,182 +1,249 @@
 # GearShare Mini
 
-A rental system for FrameWorks Gear Rental, built in four phases: a Python/OOP
-console engine, data structures and benchmarks, a SQL database, and a React
-website with an API. The full specification is in [SPEC.md](SPEC.md).
+A rental system for FrameWorks Gear Rental, built in four phases: object-oriented
+Python, data structures, a SQL database, and a website on top of an HTTP API.
+A customer can search the gear, rent it, join a waiting list and see their
+rentals, from a console menu or from the browser, using the same engine and
+database.
 
+| Phase | Topic | Branch |
+|---|---|---|
+| 1 | Python and OOP | `feature/python` |
+| 2 | Data structures | `feature/dsa` |
+| 3 | SQL | `feature/sql` |
+| 4 | API and website (React + Tailwind) | `feature/react` |
 
-## Requirements
+## Contents
 
-- Python 3.11 or newer
-- Node.js (LTS) and npm, for the website
-- Git
+1. [Quick start](#quick-start)
+2. [Preview](#preview)
+3. [AI Metrics](#ai-metrics)
+4. [The console menu](#the-console-menu)
+5. [Project layout](#project-layout)
+6. [Business rules](#business-rules)
+7. [What each phase added](#what-each-phase-added)
+8. [Tests](#tests)
+9. [Documentation index](#documentation-index)
+10. [Troubleshooting](#troubleshooting)
 
-## Setup
+---
 
-### Windows (PowerShell)
+## Quick start
 
-```powershell
-py -m venv venv
-.\venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
+**You need:** Python 3.11+, Node.js with npm, and git.
+
+### 1. Get the code and set up Python
+
+```
+git clone https://github.com/<your-username>/<your-repo>.git
+cd "Project code - Zoho"
+python -m venv venv
 ```
 
-### macOS / Linux
+Windows (PowerShell): `venv\Scripts\activate`
+macOS / Linux: `source venv/bin/activate`
 
-```sh
-python3 -m venv venv
-source venv/bin/activate
+```
 python -m pip install -r requirements.txt
 ```
 
 If PowerShell blocks activation, run
 `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned` once.
 
-## Run the console app (Phases 1 to 3)
+### 2. Run the console app
 
-All sample outputs assume today is 2026-11-03.
+The sample data is built around **2026-11-03**, so set `TODAY`.
 
-```powershell
-# Windows PowerShell
-$env:TODAY = "2026-11-03"
-python main.py
-```
+Windows (PowerShell): `$env:TODAY="2026-11-03"; python main.py`
+macOS / Linux: `TODAY=2026-11-03 python main.py`
 
-```sh
-# macOS / Linux
-TODAY=2026-11-03 python main.py
-```
+The first run creates `gearshare.db` from the schema and starter data.
+Delete `gearshare.db` to start again from the starter data.
 
-The first run creates `gearshare.db` from `sql/schema.sql` and `sql/seed.sql`.
-Delete `gearshare.db` to reset to the starter data.
-
-## Run the API and website (Phase 4)
-
-Use two terminals, both from the project root.
-
-**Terminal 1: API** (http://127.0.0.1:8000, test page at `/docs`)
-
-```sh
-python -m uvicorn api.main:app --reload
-```
-
-**Terminal 2: website** (http://localhost:5173)
-
-```sh
-cd web
-npm install
-npm run dev
-```
-
-The website reads the API address from `web/.env`:
+### 3. Run the website (two terminals, from the project root)
 
 ```
-VITE_API_URL=http://127.0.0.1:8000
+python -m uvicorn api.main:app --reload      # terminal 1: API on port 8000
+cd web && npm install && npm run dev         # terminal 2: site on port 5173
 ```
 
-Restart `npm run dev` after changing it. Details: [api/README.md](api/README.md)
-and [web/README.md](web/README.md).
+Open <http://localhost:5173>. API test page: <http://127.0.0.1:8000/docs>.
+The site reads the API address from `web/.env` (`VITE_API_URL=http://127.0.0.1:8000`).
 
-## Run the tests
+---
 
-```sh
-python -m pytest -v      # Python: Phases 1 to 4 (API)
-cd web && npm test       # React: basket reducer tests
-```
+## Preview
 
-Every Python test uses a fresh temporary database.
 
-## Project structure
 
-```
-items.py, customers.py, rentals.py,    Phase 1: classes, errors, service, menu
-errors.py, gearshare.py, audit.py, main.py
-dsa/                                   Phase 2: search, sorting, hashing, history,
-                                       categories, recursion
-benchmarks/                            Phase 2: audit, sort and queue comparisons
-sql/                                   Phase 3: schema, seed, queries, tx demo,
-                                       indexes, index report scripts
-storage/                               Phase 3: repository classes (sqlite3)
-experiments/                           Phase 3: SQL injection demo (intentionally unsafe)
-api/                                   Phase 4: FastAPI endpoints
-web/                                   Phase 4: React + Vite + Tailwind
-data/                                  Starter CSVs and the flat file
-docs/                                  Design, reports, diagrams, checklists
-tests/                                 pytest suite
-DECISIONS.md, AI_LOG.md                Design decisions and AI prompt log
-```
+---
 
-## Phase 1: rule coverage
+## AI Metrics
 
-| Rule | Method | Test |
+This project was built with AI at every step, as the assignment requires.
+
+| Item | Detail |
+|---|---|
+| AI tool | GitHub Copilot in VS Code (Agent mode), approved by the coordinator |
+| Activity tracking | WakaTime extension in VS Code |
+| Working style | One agent prompt per numbered task, reviewed before accepting |
+| Prompts used | **[Fill]** total (one entry per prompt in [AI_LOG.md](AI_LOG.md)) |
+| Coding time | **[Fill]** hours, from the WakaTime dashboard |
+| Languages tracked | **[Fill]** e.g. Python, JavaScript, SQL, Markdown |
+
+**How AI was used, by phase**
+
+| Phase | AI did | I did |
 |---|---|---|
-| R1 | `GearShare.rent()` | `test_display_item` |
-| R2 | `Accessory.rental_period()`, `GearShare.extend()` | `test_accessory_is_always_rentable_for_two_days`, `test_accessory_cannot_be_extended` |
-| R3 | `GearShare.rent()` | `test_rental_limit` |
-| R4 | `GearShare.rent()` | `test_unpaid_fines_above_500`, `test_rohan_is_blocked_with_unpaid_fines` |
-| R5 | `GearShare.late_fee()` | `test_late_fee_examples` |
-| R6 | `GearShare.extend()` | `test_extensions_two_steps_and_then_error` |
-| R7 | `GearShare.join_waiting_list()`, `GearShare.return_item()` | `test_vikram_return_fee_and_waiting_list` |
-| R8 | `GearShare.rent()` | `test_duplicate_rental` |
-| R9 | `GearItem.sku` setter | `test_invalid_sku`, `test_sku_property_rejects_invalid_values` |
-| R10 | `GearShare.late_fee()` | `test_late_fee_examples`, `test_return_on_due_date_not_late` |
+| 1. Python and OOP | Wrote classes, service, menu and tests from SPEC.md | Reviewed the diff, replayed Session A by hand, checked for `if tier ==` |
+| 2. Data structures | Wrote search, sorts, hashing, history and benchmarks | Ran the benchmarks, wrote the Surprises in my own words |
+| 3. SQL | Wrote schema, seed, 12 queries, repositories | Checked every query result against the spec, ran the rollback demo |
+| 4. API and website | Wrote the endpoints, React pages and theme | Tested all behaviour-table rows, the race condition and the 360 px layout |
 
-## Phase 2: data structures
+**Where I corrected the AI:** **[Fill]** 2 or 3 real examples, such as a failing
+test fixed, a wrong message corrected, or a rule moved out of the API.
 
-| Topic | Where |
+**Evidence:** WakaTime dashboard screenshot 
+
+
+and the prompt log in [AI_LOG.md](AI_LOG.md).
+
+---
+
+## The console menu
+
+Type a number and press Enter. `0` exits.
+
+| Choice | What it does | Example result |
+|---|---|---|
+| 1 | List the catalogue | Table with `1 of 2`, `0 of 1` or `not rentable` |
+| 2 | Search by name or tag | `1 result:` or `No items match 'zzz'.` |
+| 3 | Rent | `OK: Ananya Nair rented 'Sony 50mm Lens'. Due 2026-11-06.` |
+| 4 | Return | `OK: Vikram Shah returned 'DJI Mini Drone'. Late by 5 days. Fee: ₹500.` |
+| 5 | Extend | `OK: Extended 'Manfrotto Tripod' (extension 1 of 2). New due date ...` |
+| 6 | Join waiting list | `OK: Meera Joshi is #1 on the waiting list for 'DJI Mini Drone'.` |
+| 7 | Customer rentals | Active rentals, `OVERDUE (5 days)`, items held of limit, unpaid fines |
+| 8 | Overdue report | Late rentals, most late first, with the fine so far |
+| 9 | Undo | Reverses the latest rent or return, or `Nothing to undo.` |
+
+Money is whole rupees (`₹100`) and dates are `YYYY-MM-DD`. Errors look like
+`ERROR [R3]: ...` for a rule and `ERROR [ClassName]: ...` otherwise.
+
+**Try this:** `3`, `C003`, `1000000003` (no units free, answer `y` to join the
+waiting list), then `4`, `RN001`. The output ends with
+`Next on waiting list: Meera Joshi.`
+
+**Persistence check:** rent `1000000002` as `C001`, exit with `0`, start again and
+choose `7` for `C001`. Rental `RN011` is still there.
+
+---
+
+## Project layout
+
+```
+Project code - Zoho/
+├─ data/                 Starter CSVs and the flat file
+├─ items.py, customers.py, rentals.py, errors.py, audit.py, gearshare.py, main.py
+├─ dsa/                  Search, sorting, hashing, history, categories, recursion
+├─ benchmarks/           Audit, sort and queue comparisons
+├─ sql/                  schema, seed, queries, tx demo, indexes, report scripts
+├─ storage/              Database helper and one repository per table group
+├─ experiments/          Injection demo (deliberately unsafe)
+├─ api/                  FastAPI app
+├─ web/                  React + Vite + Tailwind site
+├─ tests/                pytest suite
+├─ docs/                 Design, reports, diagrams, checklists
+├─ DECISIONS.md          Design decisions and why
+├─ AI_LOG.md             Every AI prompt and what I changed
+└─ SPEC.md               The project specification
+```
+
+The layers: domain classes at the bottom, then the `GearShare` service where the
+rules are applied, then three front doors: the console menu, the HTTP API and
+(through the API) the website. None of them applies a rule itself.
+
+---
+
+## Business rules
+
+| Rule | What it says | Enforced in | Test |
+|---|---|---|---|
+| R1 | Display items are never rented | `GearShare.rent` | `test_display_item` |
+| R2 | Accessories: 2 days, no extension | `Accessory.rental_period`, `GearShare.extend` | `test_accessory_cannot_be_extended` |
+| R3 | Item limit by tier (2, 4, 8) | `GearShare.rent` | `test_rental_limit` |
+| R4 | Rent blocked when unpaid fines are above ₹500 | `GearShare.rent` | `test_unpaid_fines_above_500` |
+| R5 | Late fee capped at the item price | `GearShare.late_fee` | `test_late_fee_examples` |
+| R6 | Max 2 extensions, none if someone waits | `GearShare.extend` | `test_extensions_two_steps_and_then_error` |
+| R7 | Waiting list, first come first served | `GearShare.join_waiting_list` | `test_vikram_return_fee_and_waiting_list` |
+| R8 | No two units of the same item | `GearShare.rent` | `test_duplicate_rental` |
+| R9 | SKU is exactly 10 digits | `GearItem.sku` setter | `test_invalid_sku` |
+| R10 | Returning on the due date is not late | `GearShare.late_fee` | `test_return_on_due_date_not_late` |
+
+**[Verify]** the test names against your `tests/` folder.
+
+---
+
+## What each phase added
+
+| Phase | What it added | Additional enhancements |
+|---|---|---|
+| 1. Python and OOP | Item and customer classes, rule exceptions, `GearShare` service, `@audit`, overdue generator, console menu | None |
+| 2. Data structures | Linear and binary search, hand-written sorts, hashing (duplicates, grouping, two-sum), undo stack, waiting-list queue, linked-list history, category tree, recursion, benchmarks | Growth-ratio columns in the benchmark report |
+| 3. SQL | Normalised SQLite database, 12 queries, transaction rollback demo, indexes, `storage/` repositories, injection experiment | Repository layer keeps `GearShare` free of SQL |
+| 4. API and website | FastAPI endpoints, React catalogue, item details, basket, my rentals, add item, routing, context, `useReducer` | See below |
+
+**Phase 4 enhancements beyond the brief:**
+
+| Enhancement | What it does |
 |---|---|
-| Linear and binary search | `dsa/search.py` |
-| Bubble, insertion, selection sort; catalogue sort | `dsa/sorting.py` |
-| Duplicates, grouping, frequency, two-sum | `dsa/hashing.py`, `import_gear.py` |
-| Undo stack, waiting-list queue | `gearshare.py` (menu option 9) |
-| Rental history (linked list) | `dsa/history.py` |
-| Recursion and category tree | `dsa/recursion.py`, `dsa/categories.py` |
+| Pink and black theme | Cursive italic headings, dark cards, cards pop out on hover and keyboard focus, respects reduced-motion |
+| Add customer page | Staff add a customer with a generated ID (C006, C007), duplicate email check, picker updates at once |
+| Category dropdown | Add item uses a list of valid categories from the API instead of free text |
+| Staff overdue page | Overdue table with pink highlight and a text label, shares the console report logic |
+| Waiting list visibility | Shows "You are #2 on the waiting list" and "Next on waiting list: ..." after a return |
+| Return button | Return from My rentals, with a confirm step and the server's fee message |
 
-Reports: [benchmark](docs/benchmark_report.md), [sorting](docs/sort_report.md),
-[queue](docs/queue_report.md). Run a benchmark with
-`python -m benchmarks.audit`.
+---
 
-## Phase 3: database
+## Tests
 
-- Schema, seed and queries: `sql/schema.sql`, `sql/seed.sql`, `sql/queries.sql` (Q1 to Q12)
-- Transaction and rollback demo: `sql/tx_demo.sql`, `python -m sql.run_tx_demo`
-- Index report: [docs/index_report.md](docs/index_report.md)
-- Normalisation and ER diagram: [docs/normalisation.md](docs/normalisation.md), `docs/er_diagram.png`
-- Injection experiment: [docs/injection_evidence.md](docs/injection_evidence.md)
+```
+python -m pytest -v        # Python: all phases and the API
+cd web && npm test         # React: basket reducer and validation
+```
 
-`GearShare` contains no SQL. All database access goes through `storage/`
-with parameterised queries.
+Every Python test uses a fresh temporary database. A test fails if any SQL in
+`storage/` or `gearshare.py` is built from text.
 
-## Phase 4: API and website
+Manual checks for the site: 360 px wide, keyboard only, and "Slow 3G" in the
+browser tools to confirm that an old response never replaces a newer one.
 
-| Endpoint | Purpose |
+---
+
+## Documentation index
+
+| File | What is in it |
 |---|---|
-| `GET /gear`, `GET /gear/{sku}` | Search and view items |
-| `POST /gear` | Staff: add an item |
-| `POST /rentals` | Rent an item |
-| `POST /rentals/{id}/return`, `/extend` | Return or extend |
-| `POST /waiting-list` | Join the waiting list |
-| `GET /customers`, `GET /customers/{id}/rentals` | Customers and their rentals |
-| `GET /overdue` | Staff overdue rental report |
-| `GET /gear/{sku}/waiting-list` | Customer queue for an item |
-| `POST /customers` | Staff: add a customer |
-| `GET /categories` | List rentable item categories |
+| [DECISIONS.md](DECISIONS.md) | Design decisions and the alternatives rejected |
+| [AI_LOG.md](AI_LOG.md) | AI prompts used, and what I changed |
+| [docs/design.md](docs/design.md) | Class diagram and CRC cards |
+| [docs/benchmark_report.md](docs/benchmark_report.md) | Predicted against measured Big-O |
+| [docs/normalisation.md](docs/normalisation.md) | Flat file to 3NF, with the three anomalies |
+| [docs/index_report.md](docs/index_report.md) | Indexes, before and after |
+| [docs/injection_evidence.md](docs/injection_evidence.md) | SQL injection experiment output |
+| [docs/component_tree.md](docs/component_tree.md) | React components and where state lives |
+| [docs/behaviour_checklist.md](docs/behaviour_checklist.md) | Phase 4 behaviour table, ticked off |
 
-Errors use `{"error": "R3", "message": "..."}` with the same text as the console.
-Statuses: 404 not found, 409 rule conflict, 422 invalid input.
+---
 
-Website routes: `/` catalogue, `/gear/:sku`, `/me`, `/basket`, `/admin/add`,
-and a 404 page. Component tree and state locations: [docs/component_tree.md](docs/component_tree.md).
-Behaviour checklist: [docs/behaviour_checklist.md](docs/behaviour_checklist.md).
+## Troubleshooting
 
-## How AI was used
-
-- Tool: GitHub Copilot in VS Code (Agent mode), one prompt per numbered task.
-- Every prompt and what I changed is recorded in [AI_LOG.md](AI_LOG.md).
-- Design decisions and rejected alternatives are in [DECISIONS.md](DECISIONS.md).
-- Activity tracking: WakaTime in VS Code.
-
-## Branches and tags
-
-One branch per phase: `feature/python`, `feature/dsa`, `feature/sql`,
-`feature/react`. Each is merged into `main` and tagged `phase-1` to `phase-4`.
+| Problem | Fix |
+|---|---|
+| The site shows "Can't reach the rental server." | Start the API and check `VITE_API_URL` in `web/.env`. Restart `npm run dev` after changing it. |
+| Browser console mentions CORS | Open the site as `http://localhost:5173` |
+| Overdue rentals or fines look different | Set `TODAY=2026-11-03` before starting |
+| I want the starter data back | Delete `gearshare.db` |
+| `pytest` or `uvicorn` not found | Activate the venv, or use `python -m pytest` and `python -m uvicorn` |
+| `ModuleNotFoundError: api` | Run `uvicorn` from the project root, not from inside `api/` |
+| `ModuleNotFoundError` in tests | Check `pytest.ini` has `pythonpath = .` |
