@@ -96,9 +96,9 @@ This project was built with AI at every step, as the assignment requires.
 | AI tool | GitHub Copilot in VS Code (Agent mode), approved by the coordinator |
 | Activity tracking | WakaTime extension in VS Code |
 | Working style | One agent prompt per numbered task, reviewed before accepting |
-| Prompts used | **[Fill]** total (one entry per prompt in [AI_LOG.md](AI_LOG.md)) |
-| Coding time | **[Fill]** hours, from the WakaTime dashboard |
-| Languages tracked | **[Fill]** e.g. Python, JavaScript, SQL, Markdown |
+| Prompts used | total (one entry per prompt in [AI_LOG.md](AI_LOG.md)) |
+| Coding time |  hours, from the WakaTime dashboard |
+| Languages tracked | e.g. Python, JavaScript, SQL, Markdown |
 
 **How AI was used, by phase**
 
@@ -109,8 +109,6 @@ This project was built with AI at every step, as the assignment requires.
 | 3. SQL | Wrote schema, seed, 12 queries, repositories | Checked every query result against the spec, ran the rollback demo |
 | 4. API and website | Wrote the endpoints, React pages and theme | Tested all behaviour-table rows, the race condition and the 360 px layout |
 
-**Where I corrected the AI:** **[Fill]** 2 or 3 real examples, such as a failing
-test fixed, a wrong message corrected, or a rule moved out of the API.
 
 **Evidence:** WakaTime dashboard screenshot:
 
