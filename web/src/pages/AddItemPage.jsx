@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { addGear } from '../api/client'
+import { addGear, getCategories } from '../api/client'
+import { useEffect } from 'react'
 
 const initialForm = {
   sku: '',
@@ -30,8 +31,25 @@ export default function AddItemPage() {
   const [form, setForm] = useState(initialForm)
   const [serverError, setServerError] = useState('')
   const [success, setSuccess] = useState('')
+  const [categories, setCategories] = useState([])
+  const [categoryStatus, setCategoryStatus] = useState('loading')
+  const [categoryRetry, setCategoryRetry] = useState(0)
   const errors = validateItem(form)
-  const isValid = Object.keys(errors).length === 0
+  const isValid = Object.keys(errors).length === 0 && Boolean(form.category)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    setCategoryStatus('loading')
+    getCategories(controller.signal)
+      .then((rows) => {
+        setCategories(rows)
+        setCategoryStatus('success')
+      })
+      .catch((error) => {
+        if (error.name !== 'AbortError') setCategoryStatus('error')
+      })
+    return () => controller.abort()
+  }, [categoryRetry])
 
   const updateField = (event) => {
     const { name, value } = event.target
@@ -71,7 +89,6 @@ export default function AddItemPage() {
           ['sku', 'SKU', 'text'],
           ['name', 'Name', 'text'],
           ['tags', 'Tags (comma separated)', 'text'],
-          ['category', 'Category', 'text'],
         ].map(([name, label, type]) => (
           <div key={name}>
             <label htmlFor={name} className="font-medium text-[var(--color-text)]">{label}</label>
@@ -90,6 +107,31 @@ export default function AddItemPage() {
             )}
           </div>
         ))}
+
+        <div>
+          <label htmlFor="category" className="font-medium text-[var(--color-text)]">Category</label>
+          {categoryStatus === 'loading' && <p role="status">Loading categories...</p>}
+          {categoryStatus === 'error' && (
+            <div role="alert">
+              <p>Couldn't load categories.</p>
+              <button type="button" onClick={() => setCategoryRetry((value) => value + 1)}>Retry</button>
+            </div>
+          )}
+          <select
+            id="category"
+            name="category"
+            value={form.category}
+            onChange={updateField}
+            required
+            disabled={categoryStatus !== 'success'}
+            className={fieldClasses}
+          >
+            <option value="" disabled>Select a category</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.name}>{category.name}</option>
+            ))}
+          </select>
+        </div>
 
         <div>
           <label htmlFor="itemType" className="font-medium text-[var(--color-text)]">Item type</label>

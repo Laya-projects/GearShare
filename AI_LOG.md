@@ -350,3 +350,19 @@ existing web application for 360 px, 768 px, and 1280 px responsiveness,
 keyboard accessibility, semantic roles, theme-token-only colours, the basket
 empty state, documentation, and README setup without changing behaviour,
 messages, routes, API, Python files, or the visual theme.
+
+Add customer creation to GearShare, the API, and the React website; add leaf
+category APIs and dropdowns to both staff item creation and catalogue filtering;
+refresh customers after successful creation; add ID/category decisions, endpoint
+documentation, and preserve all existing Python and frontend behaviour.
+
+On the Add Customer screen, disable the navbar customer picker so the selected
+customer and customer name cannot be changed while that page is active.
+
+Show an accessible, dismissible pop-up message when an item is successfully
+added to the basket: "[product name] product added to the basket".
+
+Read the existing api/, storage/, gearshare.py and web/ app. Add staff overdue
+reporting and waiting-list visibility, preserve Python business rules, routes,
+messages, visual theme, and existing tests, and document the overdue/waiting-list
+implementation decisions.

@@ -37,3 +37,22 @@ class CustomersRepository:
         for row in self.connection.execute("SELECT customer_id FROM customers").fetchall():
             totals.setdefault(row["customer_id"], 0)
         return totals
+
+    def email_exists(self, email):
+        row = self.connection.execute(
+            "SELECT 1 FROM customers WHERE LOWER(TRIM(email)) = LOWER(TRIM(?)) LIMIT 1",
+            (email,),
+        ).fetchone()
+        return row is not None
+
+    def insert(self, customer):
+        self.connection.execute(
+            """INSERT INTO customers (customer_id, name, email, tier)
+               VALUES (?, ?, ?, ?)""",
+            (
+                customer.customer_id,
+                customer.name,
+                customer.email,
+                customer.__class__.__name__.replace("Customer", ""),
+            ),
+        )

@@ -41,8 +41,10 @@ def get_service():
 @app.exception_handler(GearShareError)
 async def gearshare_error_handler(request, exc):
     status = 409
-    if exc.prefix == "InvalidSKUError":
+    if exc.prefix in ("InvalidSKUError", "InvalidMembershipError", "InvalidCustomerError", "InvalidCategoryError"):
         status = 422
+    elif exc.prefix == "DuplicateEmailError":
+        status = 409
     elif exc.prefix in ("ItemNotFoundError", "CustomerNotFoundError"):
         status = 404
     message = exc.args[0] if exc.args else exc.default_message
@@ -55,6 +57,13 @@ async def gearshare_error_handler(request, exc):
 class RentalRequest(BaseModel):
     customer_id: str
     sku: str
+
+
+class AddCustomerRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    name: str
+    email: str
+    membership_type: str
 
 
 class WaitingListRequest(BaseModel):
@@ -130,6 +139,28 @@ def get_gear(sku: str, gear_service: GearShare = Depends(get_service)):
     return gear_json(item, gear_service)
 
 
+@app.get("/gear/{sku}/waiting-list")
+def waiting_list(sku: str, gear_service: GearShare = Depends(get_service)):
+    if not isinstance(sku, str) or len(sku) != 10 or not sku.isdigit():
+        raise InvalidSKUError()
+    item = gear_service.items.get(sku)
+    if item is None:
+        raise ItemNotFoundError(sku)
+    queue = []
+    for position, customer_id in enumerate(gear_service.waiting_list(sku), start=1):
+        queue.append({
+            "position": position,
+            "customer_id": customer_id,
+            "name": gear_service.customers[customer_id].name,
+        })
+    return {"sku": sku, "item": item.name, "queue": queue}
+
+
+@app.get("/overdue")
+def overdue(gear_service: GearShare = Depends(get_service)):
+    return gear_service.overdue_report_data(TODAY)
+
+
 @app.post("/rentals", status_code=201)
 def rent(payload: RentalRequest, gear_service: GearShare = Depends(get_service)):
     return gear_service.rent(payload.customer_id, payload.sku, TODAY)
@@ -168,6 +199,23 @@ def list_customers(gear_service: GearShare = Depends(get_service)):
         }
         for customer in gear_service.customers.values()
     ]
+
+
+@app.post("/customers", status_code=201)
+def add_customer(payload: AddCustomerRequest, gear_service: GearShare = Depends(get_service)):
+    customer = gear_service.add_customer(payload.name, payload.email, payload.membership_type)
+    return {
+        "customer_id": customer.customer_id,
+        "name": customer.name,
+        "email": customer.email,
+        "membership_type": payload.membership_type,
+        "max_items": customer.max_items(),
+    }
+
+
+@app.get("/categories")
+def list_categories(gear_service: GearShare = Depends(get_service)):
+    return gear_service.list_categories()
 
 
 @app.get("/customers/{customer_id}/rentals")

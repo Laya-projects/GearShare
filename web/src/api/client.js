@@ -91,6 +91,15 @@ async function requestJson(url, options = {}) {
 }
 
 export const getCustomers = (signal) => requestJson('/customers', { signal })
+export const addCustomer = (customer, signal) =>
+  requestJson('/customers', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(customer),
+    signal,
+  })
+export const getCategories = (signal) =>
+  requestJson('/categories', { signal })
 export const postRental = (customer_id, sku, signal) =>
   requestJson('/rentals', {
     method: 'POST',
@@ -107,3 +116,12 @@ export const joinWaitingList = (customer_id, sku, signal) =>
   })
 export const getCustomerRentals = (customerId, signal) =>
   requestJson(`/customers/${encodeURIComponent(customerId)}/rentals`, { signal })
+export const getOverdue = (signal) =>
+  requestJson('/overdue', { signal })
+export const getGearWaitingList = (sku, signal) =>
+  requestJson(`/gear/${encodeURIComponent(sku)}/waiting-list`, { signal })
+export const returnRental = (rentalId, signal) =>
+  requestJson(`/rentals/${encodeURIComponent(rentalId)}/return`, {
+    method: 'POST',
+    signal,
+  })

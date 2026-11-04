@@ -14,9 +14,13 @@ from audit import audit
 from customers import BasicCustomer, PlusCustomer, ProCustomer
 from errors import (
     CustomerNotFoundError,
+    DuplicateEmailError,
     DuplicateRentalError,
     ExtensionNotAllowedError,
     InvalidSKUError,
+    InvalidMembershipError,
+    InvalidCustomerError,
+    InvalidCategoryError,
     ItemNotAvailableError,
     ItemNotFoundError,
     ItemNotRentableError,
@@ -98,6 +102,8 @@ class GearShare:
         }
         if item_type not in item_classes:
             raise ValueError("Invalid item type.")
+        if not self.items_repo.category_exists(category):
+            raise InvalidCategoryError(category)
         item = item_classes[item_type](
             sku, name, tags, category, "", weight_g, price, total_units
         )
@@ -109,6 +115,35 @@ class GearShare:
         self.skus.add(sku)
         self.waiting_lists.setdefault(sku, deque())
         return item
+
+    def list_categories(self):
+        return self.items_repo.categories()
+
+    def add_customer(self, name, email, membership_type):
+        customer_classes = {
+            "Basic": BasicCustomer,
+            "Plus": PlusCustomer,
+            "Pro": ProCustomer,
+        }
+        if membership_type not in customer_classes:
+            raise InvalidMembershipError()
+        if self.customers_repo.email_exists(email):
+            raise DuplicateEmailError(email)
+        numbers = [
+            int(customer_id[1:])
+            for customer_id in self.customers
+            if customer_id.startswith("C") and customer_id[1:].isdigit()
+        ]
+        customer_id = f"C{max(numbers, default=5) + 1:03d}"
+        try:
+            customer = customer_classes[membership_type](customer_id, name, email)
+        except ValueError as exc:
+            raise InvalidCustomerError(str(exc)) from exc
+        with transaction(self.connection):
+            self.customers_repo.insert(customer)
+        self.customers[customer_id] = customer
+        self.unpaid_fines[customer_id] = 0
+        return customer
 
     def search(self, query):
         needle = query.lower()
@@ -329,6 +364,26 @@ class GearShare:
     def overdue_report(self, today):
         rows = sorted(list(self.iter_overdue(today)), key=lambda row: row["days_late"], reverse=True)
         return rows
+
+    def overdue_report_data(self, today):
+        rows = self.overdue_report(today)
+        structured = [
+            {
+                "rental_id": row["rental"].rental_id,
+                "customer": self.customers[row["rental"].customer_id].name,
+                "item": self.items[row["rental"].sku].name,
+                "due_date": self._iso(row["rental"].due_date),
+                "days_late": row["days_late"],
+                "fine_so_far": row["fine"],
+            }
+            for row in rows
+        ]
+        return {
+            "as_of": self._iso(self._date(today)),
+            "rows": structured,
+            "total_overdue": len(structured),
+            "total_fines": sum(row["fine_so_far"] for row in structured),
+        }
 
     def iter_overdue(self, today):
         today = self._date(today)

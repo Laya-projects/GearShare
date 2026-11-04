@@ -37,6 +37,38 @@ class CustomerNotFoundError(GearShareError):
     prefix = "CustomerNotFoundError"
 
 
+class DuplicateEmailError(GearShareError):
+    """Raised when a customer email is already registered."""
+
+    def __init__(self, email):
+        super().__init__(f"A customer with email {email} already exists.")
+    prefix = "DuplicateEmailError"
+
+
+class InvalidMembershipError(GearShareError):
+    """Raised when a membership type is not supported."""
+
+    prefix = "InvalidMembershipError"
+    default_message = "Membership must be Basic, Plus or Pro."
+
+
+class InvalidCustomerError(GearShareError):
+    """Raised for invalid customer name or email values."""
+
+    prefix = "InvalidCustomerError"
+
+    def __init__(self, message):
+        super().__init__(message)
+
+
+class InvalidCategoryError(GearShareError):
+    """Raised when an item category does not exist."""
+
+    def __init__(self, category):
+        super().__init__(f"Unknown category '{category}'.")
+    prefix = "InvalidCategoryError"
+
+
 class ItemNotRentableError(GearShareError):
     """Raised for R1 display items."""
 

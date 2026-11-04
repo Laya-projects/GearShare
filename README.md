@@ -157,6 +157,10 @@ with parameterised queries.
 | `POST /rentals/{id}/return`, `/extend` | Return or extend |
 | `POST /waiting-list` | Join the waiting list |
 | `GET /customers`, `GET /customers/{id}/rentals` | Customers and their rentals |
+| `GET /overdue` | Staff overdue rental report |
+| `GET /gear/{sku}/waiting-list` | Customer queue for an item |
+| `POST /customers` | Staff: add a customer |
+| `GET /categories` | List rentable item categories |
 
 Errors use `{"error": "R3", "message": "..."}` with the same text as the console.
 Statuses: 404 not found, 409 rule conflict, 422 invalid input.

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { useCustomer } from '../context/CustomerContext'
 import { useBasket } from '../context/BasketContext'
 
@@ -7,6 +7,8 @@ export default function Navbar({ basketCount }) {
   const { customers, selectedCustomer, selectCustomer } = useCustomer()
   const basket = useBasket()
   const [menuOpen, setMenuOpen] = useState(false)
+  const location = useLocation()
+  const customerPickerDisabled = location.pathname === '/admin/customers/add'
   const linkClass = ({ isActive }) =>
     isActive
       ? 'text-[var(--color-primary)] underline underline-offset-4 drop-shadow-[0_0_5px_var(--color-primary)]'
@@ -34,12 +36,15 @@ export default function Navbar({ basketCount }) {
             Basket ({basket.items.length})
           </NavLink>
           <NavLink to="/admin/add" className={linkClass}>Add item</NavLink>
+          <NavLink to="/admin/customers/add" className={linkClass}>Add customer</NavLink>
+          <NavLink to="/admin/overdue" className={linkClass}>Overdue</NavLink>
         </div>
         <label htmlFor="customer-picker" className={`${menuOpen ? 'grid' : 'hidden'} w-full gap-1 text-sm font-medium text-[var(--color-text)] sm:grid sm:w-auto sm:grid-cols-[auto_auto] sm:items-center`}>
           Customer
           <select
             id="customer-picker"
             value={selectedCustomer?.customer_id || ''}
+            disabled={customerPickerDisabled}
             onChange={(event) => {
               const customer = customers.find((candidate) => candidate.customer_id === event.target.value)
               selectCustomer(customer || null)

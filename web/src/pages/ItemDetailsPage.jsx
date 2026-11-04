@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
-import { getGearItem } from '../api/client'
+import { getGearItem, getGearWaitingList } from '../api/client'
 import AvailabilityBadge from '../components/AvailabilityBadge'
 import ErrorMessage from '../components/ErrorMessage'
 import LoadingMessage from '../components/LoadingMessage'
 import { useCustomer } from '../context/CustomerContext'
 import { useBasket } from '../context/BasketContext'
 import { joinWaitingList } from '../api/client'
+import { waitingListMessage } from '../utils/waitingListMessage'
 
 export default function ItemDetailsPage() {
   const { sku } = useParams()
@@ -18,6 +19,22 @@ export default function ItemDetailsPage() {
   const [error, setError] = useState(null)
   const [retryVersion, setRetryVersion] = useState(0)
   const [actionMessage, setActionMessage] = useState('')
+  const [waitingQueue, setWaitingQueue] = useState([])
+
+  const loadWaitingList = async (controller = new AbortController()) => {
+    try {
+      const result = await getGearWaitingList(sku, controller.signal)
+      setWaitingQueue(result.queue)
+    } catch (requestError) {
+      if (requestError.name !== 'AbortError') setWaitingQueue([])
+    }
+  }
+
+  useEffect(() => {
+    const controller = new AbortController()
+    loadWaitingList(controller)
+    return () => controller.abort()
+  }, [sku])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -84,6 +101,7 @@ export default function ItemDetailsPage() {
               }
               const result = await joinWaitingList(selectedCustomer.customer_id, item.sku)
               setActionMessage(`Waiting list position: ${result.position}.`)
+              await loadWaitingList()
             } catch (requestError) {
               setActionMessage(requestError.message)
             }
@@ -107,6 +125,9 @@ export default function ItemDetailsPage() {
       )}
       {basket.message && <p role="alert" className="mt-2 text-sm text-[var(--color-error)]">{basket.message}</p>}
       {actionMessage && <p className="mt-2 text-sm">{actionMessage}</p>}
+      <p role="status" className="mt-2 text-sm text-[var(--color-soft-pink)]">
+        {waitingListMessage(waitingQueue, selectedCustomer?.customer_id)}
+      </p>
     </article>
   )
 }

@@ -76,3 +76,31 @@ class ItemsRepository:
                    VALUES (?, ?)""",
                 (item.sku, tag_id),
             )
+
+    def categories(self):
+        rows = self.connection.execute(
+            """SELECT leaf.category_id AS id, leaf.name AS name,
+                      parent.name AS parent
+               FROM categories leaf
+               LEFT JOIN categories parent ON parent.category_id = leaf.parent_id
+               WHERE leaf.name != 'Photography'
+               ORDER BY leaf.name"""
+        ).fetchall()
+        return [
+            {"id": row["id"], "name": row["name"], "parent": row["parent"]}
+            for row in rows
+        ]
+
+    def category_exists(self, name):
+        row = self.connection.execute(
+            """SELECT 1 FROM categories
+               WHERE name = ?
+               AND parent_id IS NOT NULL""",
+            (name,),
+        ).fetchone()
+        if row is None and name in ("Drones", "Tripods", "Audio", "Showcase", "Accessories"):
+            row = self.connection.execute(
+                "SELECT 1 FROM categories WHERE name = ? AND parent_id IS NULL",
+                (name,),
+            ).fetchone()
+        return row is not None

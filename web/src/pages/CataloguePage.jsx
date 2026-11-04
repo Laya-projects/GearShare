@@ -6,17 +6,7 @@ import LoadingMessage from '../components/LoadingMessage'
 import ErrorMessage from '../components/ErrorMessage'
 import EmptyMessage from '../components/EmptyMessage'
 import useDebouncedValue from '../hooks/useDebouncedValue'
-
-const categories = [
-  'All',
-  'Cameras',
-  'Lenses',
-  'Drones',
-  'Tripods',
-  'Audio',
-  'Showcase',
-  'Accessories',
-]
+import { getCategories } from '../api/client'
 
 export default function CataloguePage() {
   const location = useLocation()
@@ -29,10 +19,21 @@ export default function CataloguePage() {
   const [status, setStatus] = useState('loading')
   const [error, setError] = useState(null)
   const [retryVersion, setRetryVersion] = useState(0)
+  const [categories, setCategories] = useState(['All'])
 
   useEffect(() => {
     setQ(searchParams.get('q') || '')
   }, [searchParams])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    getCategories(controller.signal)
+      .then((rows) => setCategories(['All', ...rows.map((row) => row.name)]))
+      .catch((requestError) => {
+        if (requestError.name !== 'AbortError') setCategories(['All'])
+      })
+    return () => controller.abort()
+  }, [])
 
   const updateSearchParam = (key, value) => {
     const nextParams = new URLSearchParams(searchParams)

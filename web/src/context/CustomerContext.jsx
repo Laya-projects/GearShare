@@ -8,6 +8,12 @@ export function CustomerProvider({ children }) {
   const [selectedCustomer, setSelectedCustomer] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  const refreshCustomers = async () => {
+    const customerList = await getCustomers()
+    setCustomers(customerList)
+    return customerList
+  }
+
   useEffect(() => {
     let storedId = ''
     try {
@@ -37,7 +43,7 @@ export function CustomerProvider({ children }) {
 
   return (
     <CustomerContext.Provider
-      value={{ customers, selectedCustomer, selectCustomer, loading }}
+      value={{ customers, selectedCustomer, selectCustomer, loading, refreshCustomers }}
     >
       {children}
     </CustomerContext.Provider>
