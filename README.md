@@ -74,6 +74,15 @@ The site reads the API address from `web/.env` (`VITE_API_URL=http://127.0.0.1:8
 
 ## Preview
 
+<img width="1137" height="885" alt="image" src="https://github.com/user-attachments/assets/55d49ec6-a31c-4ee4-8517-6624b311c0cf" />
+
+<img width="1893" height="869" alt="image" src="https://github.com/user-attachments/assets/262615a3-edf3-427d-a8ac-a46a5118adaa" />
+
+<img width="1899" height="877" alt="image" src="https://github.com/user-attachments/assets/3d04380e-97b8-47ab-987f-68e77138d825" />
+
+<img width="1232" height="879" alt="image" src="https://github.com/user-attachments/assets/60b13491-4476-4726-be06-73d32d2cc6d0" />
+
+<img width="1150" height="307" alt="image" src="https://github.com/user-attachments/assets/0170750c-9cd1-4fe0-9824-29c4d410eea0" />
 
 
 ---
@@ -103,8 +112,9 @@ This project was built with AI at every step, as the assignment requires.
 **Where I corrected the AI:** **[Fill]** 2 or 3 real examples, such as a failing
 test fixed, a wrong message corrected, or a rule moved out of the API.
 
-**Evidence:** WakaTime dashboard screenshot 
+**Evidence:** WakaTime dashboard screenshot:
 
+<img width="1915" height="946" alt="image" src="https://github.com/user-attachments/assets/523bdd7f-4823-46b5-8fcb-54031db21b8c" />
 
 and the prompt log in [AI_LOG.md](AI_LOG.md).
 
