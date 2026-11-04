@@ -78,35 +78,37 @@ export default function CataloguePage() {
   const resultCount = items.length
   return (
     <div>
-      <h1 className="mb-6 text-3xl font-bold text-slate-900">Catalogue</h1>
+      <header className="catalogue-hero mb-6 rounded-lg px-5 py-4 sm:px-7">
+        <h1 className="text-3xl font-bold text-[var(--color-text)]">Catalogue</h1>
+      </header>
       <div className="mb-4 grid gap-3 md:grid-cols-3">
-        <label className="grid gap-1 text-sm font-medium text-slate-700">
+        <label className="grid min-w-0 gap-1 text-sm font-medium text-[var(--color-text)]">
           Search
           <input
             type="search"
             value={q}
             onChange={handleSearchChange}
-            className="rounded-md border border-slate-300 px-3 py-2"
+            className="min-w-0 rounded-md px-3 py-2"
           />
         </label>
-        <label className="grid gap-1 text-sm font-medium text-slate-700">
+        <label className="grid min-w-0 gap-1 text-sm font-medium text-[var(--color-text)]">
           Category
           <select
             value={category}
             onChange={(event) => updateSearchParam('category', event.target.value)}
-            className="rounded-md border border-slate-300 px-3 py-2"
+            className="min-w-0 rounded-md px-3 py-2"
           >
             {categories.map((option) => (
               <option key={option} value={option}>{option}</option>
             ))}
           </select>
         </label>
-        <label className="grid gap-1 text-sm font-medium text-slate-700">
+        <label className="grid min-w-0 gap-1 text-sm font-medium text-[var(--color-text)]">
           Sort
           <select
             value={sort}
             onChange={(event) => updateSearchParam('sort', event.target.value)}
-            className="rounded-md border border-slate-300 px-3 py-2"
+            className="min-w-0 rounded-md px-3 py-2"
           >
             <option value="name">Name</option>
             <option value="weight">Weight</option>
@@ -129,7 +131,7 @@ export default function CataloguePage() {
       {status === 'empty' && <EmptyMessage query={debouncedQ} />}
       {status === 'success' && (
         <>
-          <p className="mb-4 text-sm text-slate-600">
+          <p className="mb-4 text-sm text-[var(--color-muted)]">
             {resultCount} {resultCount === 1 ? 'result' : 'results'}
           </p>
           <GearList items={items} onAction={() => {}} catalogueSearch={location.search} />

@@ -31,18 +31,18 @@ export default function MyRentalsPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-slate-900">My rentals</h1>
+      <h1 className="text-3xl font-bold text-[var(--color-text)]">My rentals</h1>
       {status === 'pick' && <p className="mt-4">Pick a customer first.</p>}
-      {status === 'loading' && <p className="mt-4">Loading rentals...</p>}
-      {status === 'error' && <p className="mt-4 text-red-700">{error}</p>}
+      {status === 'loading' && <p role="status" aria-live="polite" className="mt-4">Loading rentals...</p>}
+      {status === 'error' && <p role="alert" className="mt-4 text-[var(--color-error)]">{error}</p>}
       {(status === 'success' || status === 'empty') && (
         <>
           <p className="mt-4">Active rentals: {data.active.length} of {data.max_items}</p>
           <p>Unpaid fines: ₹{data.unpaid_fines}</p>
           {status === 'empty' && <p className="mt-4">No active rentals.</p>}
           {status === 'success' && (
-            <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-left">
+            <div className="mt-4 max-w-full overflow-x-auto">
+              <table className="min-w-[640px] w-full text-left">
                 <thead>
                   <tr>
                     <th className="p-2">Rental</th>

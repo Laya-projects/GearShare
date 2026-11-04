@@ -4,26 +4,26 @@ import { useCustomer } from '../context/CustomerContext'
 import { useBasket } from '../context/BasketContext'
 import { joinWaitingList } from '../api/client'
 
-export default function GearCard({ item, onAction, catalogueSearch = '' }) {
+export default function GearCard({ item, onAction, catalogueSearch = '', style }) {
   const isDisplay = item.item_type === 'Display'
   const { selectedCustomer } = useCustomer()
   const basket = useBasket()
   const full = selectedCustomer && basket.items.length >= selectedCustomer.max_items
 
   return (
-    <li className="flex flex-col rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <li style={style} className="gear-card card-enter flex flex-col rounded-lg border bg-[var(--color-surface)] p-5 shadow-sm">
       <article>
-        <h2 className="text-xl font-semibold text-slate-900">
+        <h2 className="gear-card-title text-xl font-semibold text-[var(--color-text)]">
           <Link
             to={`/gear/${item.sku}`}
             state={{ catalogueSearch }}
-            className="hover:text-blue-700 hover:underline"
+            className="text-[var(--color-text)] hover:text-[var(--color-soft-pink)] hover:underline"
           >
             {item.name}
           </Link>
         </h2>
-        <p className="mt-2 text-sm text-slate-600">{item.tags.join(', ')}</p>
-        <p className="mt-1 text-sm text-slate-500">{item.category}</p>
+        <p className="mt-2 text-sm text-[var(--color-muted)]">{item.tags.join(', ')}</p>
+        <p className="mt-1 text-sm text-[var(--color-muted)]">{item.category}</p>
         <div className="mt-4">
           <AvailabilityBadge
             available={item.available}
@@ -44,12 +44,12 @@ export default function GearCard({ item, onAction, catalogueSearch = '' }) {
                 await joinWaitingList(selectedCustomer.customer_id, item.sku)
               }}
               disabled={item.available > 0 && full}
-              className="mt-5 w-full rounded-md bg-blue-700 px-4 py-2 font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="mt-5 w-full rounded-md bg-[var(--color-primary)] px-4 py-2 font-medium text-[var(--color-background)] hover:bg-[var(--color-primary-hover)]"
             >
               {item.available > 0 ? 'Add to basket' : 'Join waiting list'}
             </button>
             {item.available > 0 && (!selectedCustomer || basket.message) && (
-              <p className="mt-2 text-sm text-red-700">
+              <p role={basket.message ? 'alert' : undefined} className="mt-2 text-sm text-[var(--color-error)]">
                 {!selectedCustomer ? 'Pick a customer first.' : basket.message}
               </p>
             )}

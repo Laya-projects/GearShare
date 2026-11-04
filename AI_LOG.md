@@ -335,3 +335,18 @@ Read SPEC.md Phase 4 task 4.6 and the behaviour table. Add customer and
 basket contexts, reducer, navbar picker, checkout and rentals flows, waiting
 list actions, Vitest reducer coverage, shared-state decisions, and do not run
 Git commands or change api/ or Python files.
+
+Read the existing web app and apply the visual redesign only: add local
+display and body fonts, pink/black semantic design tokens, accessible dark
+theme styling, catalogue skeleton cards, responsive card motion, sticky
+navbar, pink focus states, reduced-motion support, and touch safeguards
+without changing routes, messages, behavior, data logic, API, or Python files.
+
+Change the font to Times New Roman and italics globally without changing
+behaviour, routes, messages, data logic, API, or Python files.
+
+Read SPEC.md Phase 4 task 4.7 and the behaviour table. Audit and fix the
+existing web application for 360 px, 768 px, and 1280 px responsiveness,
+keyboard accessibility, semantic roles, theme-token-only colours, the basket
+empty state, documentation, and README setup without changing behaviour,
+messages, routes, API, Python files, or the visual theme.

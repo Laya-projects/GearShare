@@ -121,6 +121,21 @@ Problem: A client-side limit improves immediate feedback, but it cannot protect 
 Choice: Keep the React basket limit from the selected customer's max_items and retain the GearShare server limit as authoritative.
 Why: React prevents predictable UX friction, while the server remains the final security and integrity boundary for rentals.
 
+28. Use local cursive display fonts with pink/black semantic tokens
+Problem: The redesign needs a distinctive professional interface while remaining readable and accessible.
+Choice: Limit Dancing Script to brand, headings, navigation, and buttons; use locally packaged Nunito italic for body text, tables, and forms. Keep pink and black contrast readable with semantic background, surface, border, text, muted, success, and error tokens.
+Why: Cursive is reserved for short display text so names, dates, SKUs, errors, and form values remain highly legible; black text on hot pink buttons uses stronger contrast, while the light surface text preserves the required 4.5:1 minimum.
+
+29. Use Times New Roman italic for all interface typography
+Problem: The existing cursive display and Nunito body fonts do not match the requested editorial typography.
+Choice: Use Times New Roman italic globally for headings, brand text, navigation, buttons, forms, tables, numbers, dates, SKUs, and messages; remove the Dancing Script and Nunito packages.
+Why: A single Times New Roman italic font family gives consistent requested styling across the pink/black interface while retaining the established semantic colours, and importantly strong text contrast and visible focus states remain unchanged.
+
+30. Keep Tailwind CSS for Phase 4.7 styling
+Problem: The Phase 4 frontend needs one consistent responsive and theme implementation across all routes.
+Choice: Keep Tailwind utilities and semantic CSS tokens rather than adding Material UI.
+Why: Tailwind is already integrated, has smaller bundle and styling overhead for this application, and supports responsive variants and accessibility states without changing behaviour; Material UI would introduce a second component and theme system into the existing app.
+
 21. Map domain exceptions to HTTP statuses
 Problem: Rule failures need stable HTTP semantics without duplicating rules or messages in the API.
 Choice: Use 404 for missing customers and items, 422 for invalid SKU input, and 409 for item/rental rule conflicts.

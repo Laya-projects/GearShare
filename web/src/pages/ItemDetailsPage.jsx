@@ -55,13 +55,13 @@ export default function ItemDetailsPage() {
 
   return (
     <article>
-      <Link to={`/${catalogueSearch}`} className="mb-5 inline-block text-blue-700 hover:underline">
+      <Link to={`/${catalogueSearch}`} className="mb-5 inline-block text-[var(--color-soft-pink)] hover:underline">
         Back to results
       </Link>
-      <h1 className="text-3xl font-bold text-slate-900">{item.name}</h1>
-      <p className="mt-2 text-slate-600">{item.tags.join(', ')}</p>
-      <p className="mt-1 text-slate-600">{item.category}</p>
-      <p className="mt-1 text-slate-600">{item.weight_g} g</p>
+      <h1 className="text-3xl font-bold text-[var(--color-text)]">{item.name}</h1>
+      <p className="mt-2 text-[var(--color-muted)]">{item.tags.join(', ')}</p>
+      <p className="mt-1 text-[var(--color-muted)]">{item.category}</p>
+      <p className="mt-1 text-[var(--color-muted)]">{item.weight_g} g</p>
       <div className="mt-4">
         <AvailabilityBadge
           available={item.available}
@@ -70,7 +70,7 @@ export default function ItemDetailsPage() {
         />
       </div>
       {item.item_type === 'Display' ? (
-        <p className="mt-5 font-medium text-slate-700">
+        <p className="mt-5 font-medium text-[var(--color-text)]">
           Display item: view in the shop only.
         </p>
       ) : item.available === 0 ? (
@@ -88,7 +88,7 @@ export default function ItemDetailsPage() {
               setActionMessage(requestError.message)
             }
           }}
-          className="mt-5 rounded-md bg-blue-700 px-4 py-2 text-white"
+          className="mt-5 rounded-md bg-[var(--color-primary)] px-4 py-2 text-[var(--color-background)]"
         >
           Join waiting list
         </button>
@@ -97,15 +97,15 @@ export default function ItemDetailsPage() {
           type="button"
           disabled={full}
           onClick={() => basket.add(item)}
-          className="mt-5 rounded-md bg-blue-700 px-4 py-2 text-white disabled:bg-slate-300"
+          className="mt-5 rounded-md bg-[var(--color-primary)] px-4 py-2 text-[var(--color-background)]"
         >
           Add to basket
         </button>
       )}
       {!selectedCustomer && !full && item.available > 0 && (
-        <p className="mt-2 text-sm text-red-700">Pick a customer first.</p>
+        <p role="status" className="mt-2 text-sm text-[var(--color-error)]">Pick a customer first.</p>
       )}
-      {basket.message && <p className="mt-2 text-sm text-red-700">{basket.message}</p>}
+      {basket.message && <p role="alert" className="mt-2 text-sm text-[var(--color-error)]">{basket.message}</p>}
       {actionMessage && <p className="mt-2 text-sm">{actionMessage}</p>}
     </article>
   )

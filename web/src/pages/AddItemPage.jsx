@@ -61,11 +61,11 @@ export default function AddItemPage() {
     }
   }
 
-  const fieldClasses = 'mt-1 block w-full rounded-md border border-slate-300 px-3 py-2'
+  const fieldClasses = 'mt-1 block w-full rounded-md px-3 py-2'
 
   return (
     <div className="max-w-2xl">
-      <h1 className="mb-6 text-3xl font-bold text-slate-900">Add item</h1>
+      <h1 className="mb-6 text-3xl font-bold text-[var(--color-text)]">Add item</h1>
       <form onSubmit={handleSubmit} className="grid gap-4">
         {[
           ['sku', 'SKU', 'text'],
@@ -74,7 +74,7 @@ export default function AddItemPage() {
           ['category', 'Category', 'text'],
         ].map(([name, label, type]) => (
           <div key={name}>
-            <label htmlFor={name} className="font-medium text-slate-700">{label}</label>
+            <label htmlFor={name} className="font-medium text-[var(--color-text)]">{label}</label>
             <input
               id={name}
               name={name}
@@ -86,13 +86,13 @@ export default function AddItemPage() {
               className={fieldClasses}
             />
             {errors[name] && (
-              <p id={`${name}-error`} className="mt-1 text-sm text-red-700">{errors[name]}</p>
+              <p id={`${name}-error`} role="alert" className="mt-1 text-sm text-[var(--color-error)]">{errors[name]}</p>
             )}
           </div>
         ))}
 
         <div>
-          <label htmlFor="itemType" className="font-medium text-slate-700">Item type</label>
+          <label htmlFor="itemType" className="font-medium text-[var(--color-text)]">Item type</label>
           <select
             id="itemType"
             name="itemType"
@@ -112,7 +112,7 @@ export default function AddItemPage() {
           ['total', 'Total units', 'number'],
         ].map(([name, label, type]) => (
           <div key={name}>
-            <label htmlFor={name} className="font-medium text-slate-700">{label}</label>
+            <label htmlFor={name} className="font-medium text-[var(--color-text)]">{label}</label>
             <input
               id={name}
               name={name}
@@ -125,17 +125,17 @@ export default function AddItemPage() {
               className={fieldClasses}
             />
             {errors[name] && (
-              <p id={`${name}-error`} className="mt-1 text-sm text-red-700">{errors[name]}</p>
+              <p id={`${name}-error`} role="alert" className="mt-1 text-sm text-[var(--color-error)]">{errors[name]}</p>
             )}
           </div>
         ))}
 
-        {serverError && <p role="alert" className="text-red-700">{serverError}</p>}
-        {success && <p role="status" className="text-green-700">{success}</p>}
+        {serverError && <p role="alert" className="text-[var(--color-error)]">{serverError}</p>}
+        {success && <p role="status" className="text-[var(--color-success)]">{success}</p>}
         <button
           type="submit"
           disabled={!isValid}
-          className="rounded-md bg-blue-700 px-4 py-2 font-medium text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+          className="rounded-md bg-[var(--color-primary)] px-4 py-2 font-medium text-[var(--color-background)] disabled:cursor-not-allowed"
         >
           Submit
         </button>
